@@ -1,6 +1,6 @@
 #' n-dimensional kernel-smoothed survival probabilites.
 #'
-#' The purpose of this function is to proivde kernel-weighted n-year survival
+#' The purpose of this function is to proivde kernel-smoothed n-year survival
 #' estimates for n-dimensial data. For example, using two predictors, x and y,
 #' predict time to death. The program estimates a hyperplane that estimates
 #' risk of death at n-years for every x, y combination.
@@ -19,6 +19,9 @@
 #'
 #' @export
 sm.coxph = function(formula, data, pred.time = 1, lambda = 1, grid = NULL){
+  # defining the pipe operator for use throughout function
+  `%>%` <- magrittr::`%>%`
+
   #converting formula to string (if not already)
   if(class(formula) == "formula") formula = deparse(formula)
 
@@ -36,7 +39,7 @@ sm.coxph = function(formula, data, pred.time = 1, lambda = 1, grid = NULL){
     means = attributes(data.scale)$`scaled:center`
     sds = attributes(data.scale)$`scaled:scale`
     # adding the outcome variable (all analyses will be done on the scaled data)
-    data.scale = bind_cols(data[outcome],as.tibble(data.scale))
+    data.scale = dplyr::bind_cols(data[outcome], tibble::as.tibble(data.scale))
 
   # which points to calculate the weighted estimates for
   # default is observed obbservations
@@ -44,18 +47,18 @@ sm.coxph = function(formula, data, pred.time = 1, lambda = 1, grid = NULL){
     results =
       data.scale %>%
       # keeping the ID and covariates
-      select_(.dots = covars) %>%
+      dplyr::select_(.dots = covars) %>%
       #keeping unique vars combinations only
-      distinct
+      dplyr::distinct(.)
   }
   # if grid of points was provided in function call
   if(is.null(grid) == FALSE){
     results =
       grid %>%
       # keeping covariates (just in case user provided additional data)
-      select_(.dots = covars) %>%
+      dplyr::select_(.dots = covars) %>%
       #keeping unique vars combinations only
-      distinct
+      dplyr::distinct(.)
 
     #scaling data to mean 0 and sd 1
     results = (results - means)/sds
@@ -64,32 +67,32 @@ sm.coxph = function(formula, data, pred.time = 1, lambda = 1, grid = NULL){
   # computing weighted results
   results =
     results %>%
-    mutate(.id. = 1:nrow(.),
+    dplyr::mutate(.id. = 1:nrow(.),
            !!outcome[1] := pred.time) %>%
-    group_by(.id.) %>%
-    do(
+    dplyr::group_by(.id.) %>%
+    dplyr::do(
       #storing prediction set as tbl0, and original data as tbl
       tbl0 = .[c(covars, outcome[1])] ,
       tbl = data.scale
       ) %>%
-    ungroup %>%
-     mutate(
+    dplyr::ungroup(.) %>%
+    dplyr::mutate(
        # calculating Euclidean distance between observation point (in tbl0), and actual data (in tbl)
-       dist = map2(tbl0, tbl,
-                       ~ as.matrix(dist(bind_rows(.x, .y)))[-1,1]),
+       dist = purrr::map2(tbl0, tbl,
+                       ~ as.matrix(dist(dplyr::bind_rows(.x, .y)))[-1,1]),
       # calculating weights, and adding to tbl
-      tbl = map2(tbl, dist,
-                 ~ bind_cols(.x, tibble(dist = .y,
+      tbl = purrr::map2(tbl, dist,
+                 ~ dplyr::bind_cols(.x, tibble::tibble(dist = .y,
                                         t = dist / lambda,
                                         K = ifelse(t <= 1, (1 - t^3)^3, 0)))),
-      pred = exp(-map2_dbl(tbl, tbl0,
+      pred = exp(-purrr::map2_dbl(tbl, tbl0,
                       ~ predict(survival::coxph(formula = as.formula(formula), data = .x),
                                 newdata = .y,
                                 type = "expected")))
      ) %>%
-    select(tbl0, pred) %>%
-    unnest(tbl0) %>%
-    select_(.dots = c(covars,"pred"))
+    dplyr::select(tbl0, pred) %>%
+    tidyr::unnest(tbl0) %>%
+    dplyr::select_(.dots = c(covars,"pred"))
 
   #scaling covariates data back to original scale
   results[covars] = results[covars]*sds + means
