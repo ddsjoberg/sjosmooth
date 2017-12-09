@@ -1,7 +1,7 @@
 context("test-sm.coxph.R")
 
 test_that("test 1: input tibble, univariate", {
-  sm.coxph(formula = Surv(time.true) ~ x, data = sjosmooth.tbl)
+  sm.coxph(formula = Surv(time.true) ~ x, data = sjosmooth.tbl, scale = T)
 })
 
 test_that("test 2: input tibble, bivariate", {

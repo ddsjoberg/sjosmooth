@@ -4,7 +4,9 @@
 \alias{sm.coxph}
 \title{n-dimensional kernel-smoothed survival probabilites.}
 \usage{
-sm.coxph(formula, data, pred.time = 1, lambda = 1, grid = NULL)
+sm.coxph(formula, data, pred.time = 1, grid = NULL, type = "survival",
+  lambda = 1, kernel = "epanechnikov", dist.method = "euclidean",
+  knn = NULL, scale = TRUE, details = FALSE)
 }
 \arguments{
 \item{formula}{The formula call used by \code{survival::coxph(formula = Surv(time, dead) ~ x + y)}.
@@ -15,18 +17,31 @@ Do not include transformed variables in the formula (e.g. \code{Surv(time, dead)
 
 \item{pred.time}{The time at which the function will estimate the survival probabilites.}
 
-\item{lambda}{The radius of the kernel for tri-cubic and Epanechnikov kernels.
-The standard deviation for the Gaussian kernel.}
-
 \item{grid}{A data.frame or tibble with named columns that are the covaraites specified in formula.
 Survival probabilities will only be estimated at these points if specified.  Otherwise, survival probabilities
 will be estimated at each unique combination of the observed covaraites.}
+
+\item{type}{Specifes the type of statistic that will be calculated.  Default is \code{survival}.}
+
+\item{lambda}{The radius of the kernel for tri-cubic and Epanechnikov kernels.
+The standard deviation for the Gaussian kernel.}
+
+\item{kernel}{Specifies the kernel to be used: \code{epanechnikov}, \code{tricube}, \code{gaussian}, and \code{knn} are accepted.
+Default is \code{epanechnikov}.  See vignettes for differences in methods.}
+
+\item{dist.method}{Specifies the distance measure to be used in the kernel.  Default is \code{euclidean}.
+Any distance measure accepted by \code{stats::dist} is acceptable.}
+
+\item{scale}{Default is TRUE. If TRUE, the covariates are scaled to mean 0 and standard deviation 1 prior to kernel smoothing.
+If includeing 2 or more covariates, scale should be set to \code{TRUE}.}
+
+\item{details}{Default is FALSE. If TRUE, the survival::coxph object will be returned along the the predictions.}
 }
 \value{
 A data.frame or tibble with the covariates and the estiamted survival probability.
 }
 \description{
-The purpose of this function is to proivde kernel-weighted n-year survival
+The purpose of this function is to proivde kernel-smoothed n-year survival
 estimates for n-dimensial data. For example, using two predictors, x and y,
 predict time to death. The program estimates a hyperplane that estimates
 risk of death at n-years for every x, y combination.

@@ -1,0 +1,187 @@
+---
+title: "sjosmooth: Theory and Methods"
+author: "Daniel D. Sjoberg"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{sjosmooth: Theory and Methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+require(ggplot2)
+```
+
+## Introduction `sjosmooth`
+The `sjosmooth` package (pronounced sō smüt͟h) was built to perform kernel smoothing on censored time-to-event or survival data.  The package provides kernel smoothed estimates of survival probabilities at specified times.  The `sm` package is closely related to the `sjosmooth` package in that it also performs kernel smoothing with censored time-to-event data; however, the `sm` package only allows for univariate estimation of a survival quantile (i.e. median survival time) using the Gaussain kernel (`sm::sm.survival()`).  `sjosmooth` allows for the use of other kernels and for an n-dimensional covarite matrix.
+
+I'll do a brief review of the theory underlying kernel smoothing, and a brief review on simulating time-to-event data.  Other vignettes focus on the usage of the `sjosmooth` package in the univariate setting, and for obtaiing kernel-smoothed survival estimates for 2 or more covarites. 
+
+![](https://raw.githubusercontent.com/simplystats/simplystats.github.io/master/_images/loess.gif)
+
+
+## Kernel Smoothing Theory
+
+Kernel smoothing is a technique for estimating a function when a parametric model for the function is unknown.  The kernel smoothing methods utilized in the `sjosmooth` package are described in detail in the sixth chapter of the second edition of Hastie, Tibshirani, and Friedman's book entitled *The Elements of Statistical Learning: Data Mining, Inference, and Prediction*.  I will proceed assuming the basics of kernel smoothing are known to the reader.
+
+The `sjosmooth` package currently supports three kernels: Epanechnikov, Tri-cube, and Gaussian. The kernel specifies how much weight is given to each observation in your dataset when performing the weighted regression.  The figure below illustrates the three kernels.
+
+```{r kernels, fig.show='hold', echo = F}
+ggplot(data.frame(x=c(-3, 3)), aes(x)) +
+  stat_function(fun=function(x) ifelse(abs(x)<=1, 3/4*(1 - x^2), 0), aes(colour="Epanechnikov")) +
+  stat_function(fun=function(x) sqrt(2*pi)^-1*exp(-1/2*x^2), aes(colour="Gaussian")) +
+  stat_function(fun=function(x) ifelse(abs(x)<=1, (1 - abs(x)^3)^3, 0)/1.1571, aes(colour="Tri-cube")) +
+  ylab("") + xlab("") + labs(color = "") + 
+  theme(legend.position="bottom", 
+        legend.direction="vertical",
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) 
+```
+
+#### Epanechnikov kernel
+The Epanechnikov quadratic kernel is  
+$$
+K_\lambda(x_0, x) = D\Big( \frac{||x - x_0||}{\lambda} \Big)
+$$
+with
+$$
+D(t) = 
+\begin{cases} 
+      \frac{3}{4}(1-t^2) & |t| \le 1 \\
+      0 & |t| > 1 \\
+\end{cases}
+$$
+The $\lambda$ paramter is the radius of the circle (or hypersphere for higher dimensions).  Any observation that is further than $\lambda$ units from $x_0$ is not included in the weighted estimate.  Observations closer to $x_0$ recieve higher weight.
+
+#### Tri-cube kernel 
+The tri-cube kernel is similalry defined similarly to the Epanechnikov kernel, except
+$$
+D(t) = 
+\begin{cases} 
+      (1-|t|^3)^3 & |t| \le 1 \\
+      0 & |t| > 1 \\
+\end{cases}
+$$
+The \lambda parameter has a similar interpretation here as it does with the Epanechnikov kernel.
+
+#### Gaussian kernel 
+The Gaussian kernel is given by
+$$
+K_\lambda(x_0, x) = \frac{1}{\sqrt{2\pi\lambda^2}^N} exp\Bigg(-\frac{||x - x_0||^2}{2\lambda^2}\Bigg)
+$$
+where $N$ is the dimension of the covariate, or predictor, vector.  Here, the weights are defined by the Gaussian distribution and \lambda is the standard deviation.  The primary difference here is that all observations are included in the estimation at every point; although, observations further from our point estimate, $x_0$, will be included with much less weight.
+
+## Simulating time-to-event data
+
+
+
+
+Next, let's simulate some data that we will later to get experience using the `sjosmooth` package.  We'll simulate the relationship between the predictors and the outcome to be non-linear (when using the Cox regression model).  
+
+The Cox proportional hazards regression estimates the hazard, $h(t)$
+$$
+h(t) = h_0(t)exp(\boldsymbol{X}\beta)
+$$
+where $h_0(t)$ is the baseline hazard and $\boldsymbol{X}\beta$ is the linear predictor.  We're going to keep these simulations simple and assume a constant baseline hazard of 1 (i.e. $h_0(t) = 1$).  As a result the cumulative baseline hazard takes the form $H_0(t) = t$.  The survival probability function is
+$$
+S(t; X) = exp(-H_0(t)*exp(\boldsymbol{X}\beta))
+$$
+which is simply $1 - F(t; \boldsymbol{X})$.  $F(t; X)$ is well known to follow a uniform distribution ($U(0,1)$).  If $U \sim U(0,1)$ it follows that $1 - U \sim U(0,1)$.  Therefore, $S(t; X) \sim U(0,1)$.  We can use these results to simulate survival data from a Cox regression model.  Survival times, $T$, can be simulated by
+$$
+T = H_0^{-1}(- \log (U)exp(-\boldsymbol{X}\beta))
+$$
+Becuase I assumed a simple baseline hazard, $H_0^{-1}(t) = t$.  Therefore, 
+$$
+T = - \log (U)exp(-\boldsymbol{X}\beta)
+$$
+We will assume a non-linear relationship between two predictors, $x$ and $y$.
+$$
+\boldsymbol{X}\beta = (x - \frac{1}{2})^2 + e^y 
+$$
+The predictors $x$ and $y$ wiill be independent from one another, for our univariate analyses the linear predictor will simply be $\boldsymbol{X}\beta = (x - \frac{1}{2})^2$.
+
+```{r sim.data}
+# # generating two predictor variables, x and y
+#   seq.n = 10
+#   set.seed(7657)
+#   sjosmooth = tibble::tibble(x = seq(from = 0, to = 1, length.out = seq.n),
+#                                 y = seq(from = 0, to = 1, length.out = seq.n))
+#   # fillingout the data so that every combination of x and y is observed.
+#   sjosmooth = tidyr::complete(sjosmooth, x, y)
+#   # replicating the covariate data (to have more than just one observation per combination of the data)
+#   sjosmooth = rbind(sjosmooth, sjosmooth, sjosmooth, sjosmooth, sjosmooth, sjosmooth, sjosmooth, sjosmooth)
+# 
+# # simulating the time to event outcome assuming a correct Cox model
+# sjosmooth = dplyr::mutate(sjosmooth,
+#                              xb.xy = (x - 0.5)^2 - exp(y) ,
+#                              xb.x = 4*(x - 0.5)^3 ,
+#                              #xb.x = x ,
+#                              time.xy = -log(runif(seq.n^2, 0, 1)) * exp(-xb.xy),
+#                              time.x = -log(runif(seq.n^2, 0, 1)) * exp(-xb.x),
+#                              # getting the true survival probabilites at time 1 using both x and y
+#                              pr.xy.t1 = exp(-exp(xb.xy)),
+#                              # getting the true survival probabilites at time 1 using x only
+#                              pr.x.t1 = exp(-exp(xb.x)))
+```
+
+#### Univariate kernel smoothing
+Here is how survival and the variable x are related to one another (true, non-simulated relationship).
+```{r true.x, fig.show='hold'}
+# ggplot(data = sjosmooth, aes(x = x, y = pr.x.t1)) + 
+#   geom_line() +
+#   scale_y_continuous(limits = c(0, 1))
+```
+
+Let us know use `sm.coxph` to estimate this relationship.
+```{r uni.sm.coxph, fig.show='hold'}
+# uni.sm.coxph = sm.coxph(data = sjosmooth, formula = Surv(time.x) ~ x, pred.time = 1, scale = F, lambda = 0.8)
+# ggplot() + 
+#   geom_line(data = uni.sm.coxph, aes(x = x, y = pred)) +
+#   geom_line(data = sjosmooth, aes(x = x, y = pr.x.t1)) +
+#   scale_y_continuous(limits = c(0, 1))
+
+
+```
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))

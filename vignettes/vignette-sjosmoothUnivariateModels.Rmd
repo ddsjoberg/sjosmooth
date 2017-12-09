@@ -1,0 +1,46 @@
+---
+title: "sjosmooth: One predictor smoothing"
+author: "Daniel D. Sjoberg"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{sjosmooth: Theory and Methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+require(ggplot2)
+```
+
+## Introduction `sjosmooth`
+The `sjosmooth` package (pronounced sō smüt͟h) was built to perform kernel smoothing on censored time-to-event or survival data.  The package provides kernel smoothed estimates of survival probabilities at specified times.  The `sm` package is closely related to the `sjosmooth` package in that it also performs kernel smoothing with censored time-to-event data; however, the `sm` package only allows for univariate estimation of a survival quantile (i.e. median survival time) using the Gaussain kernel (`sm::sm.survival()`).  `sjosmooth` allows for the use of other kernels and for an n-dimensional covarite matrix.
+
+## Using sjosmooth
+Before we get any further into the use of the `sjosmooth` package, load a few important packages into memory.
+```{r packages}
+require(sjosmooth)
+require(ggplot2)
+require(plotly)
+```
+
+Let's begin with a basic scenario where the true realtionship between the hazard, $h(t; x)$, and a single ecovariate $x$ has a linear relationship in the Cox model with slope coeffiicient equal to 1 and baseline hazard 1 (i.e. $\beta = 1$ and $h_0(t) = 1$).
+$$
+h(t) = h_0(t)e^{\beta x} = e^x
+$$
+The survival probability at time 1, $t = 1$, is given by
+$$
+S(t = 1; X) = exp(-\int_{0}^{1}h_0(t)dt*e^{x}) = exp(-e^{x})
+$$
+```{r kernels, fig.show='hold', echo = F}
+ggplot(data.frame(x = c(-3, 3)), aes(x)) +
+  stat_function(fun = function(x) exp(-exp(x)), geom = "line") +
+  scale_y_continuous(limits = c(0,1))
+```
+
+
+
