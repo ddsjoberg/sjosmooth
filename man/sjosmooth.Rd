@@ -10,6 +10,6 @@ sjosmooth: A package for perform n-dimensional kernel smoothing for Cox proporti
 }
 \section{sjosmooth functions}{
 
-sm.coxph
+sm.timeto
 }
 

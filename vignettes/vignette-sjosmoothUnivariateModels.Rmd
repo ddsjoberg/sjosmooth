@@ -23,23 +23,160 @@ The `sjosmooth` package (pronounced sō smüt͟h) was built to perform kernel sm
 ## Using sjosmooth
 Before we get any further into the use of the `sjosmooth` package, load a few important packages into memory.
 ```{r packages}
+require(tidyverse)
 require(sjosmooth)
+require(survival)
 require(ggplot2)
-require(plotly)
 ```
 
-Let's begin with a basic scenario where the true realtionship between the hazard, $h(t; x)$, and a single ecovariate $x$ has a linear relationship in the Cox model with slope coeffiicient equal to 1 and baseline hazard 1 (i.e. $\beta = 1$ and $h_0(t) = 1$).
+#### Example 1: Estimating 1-year survival--simple linear model
+Let's begin with a basic scenario where the true realtionship between the hazard, $h(t; x)$, and a single covariate $x$ has a linear relationship in the Cox model with slope coeffiicient equal to 1 and baseline hazard 1 (i.e. $\beta = 1$ and $h_0(t) = 1$).
 $$
 h(t) = h_0(t)e^{\beta x} = e^x
 $$
-The survival probability at time 1, $t = 1$, is given by
+The survival probability at time 1, $t_0 = 1$, is given by
 $$
-S(t = 1; X) = exp(-\int_{0}^{1}h_0(t)dt*e^{x}) = exp(-e^{x})
+S(t_0 = 1; X) = exp(-\int_{0}^{1}h_0(t)dt*e^{x}) = exp(-e^{x})
 $$
-```{r kernels, fig.show='hold', echo = F}
-ggplot(data.frame(x = c(-3, 3)), aes(x)) +
-  stat_function(fun = function(x) exp(-exp(x)), geom = "line") +
+```{r kernels, fig.show='hold', echo = T}
+ggplot(data.frame(x = c(0, 1)), aes(x)) +
+  stat_function(fun = function(x) exp(-exp(x)), geom = "line", linetype = "dashed") +
   scale_y_continuous(limits = c(0,1))
+```
+
+Now, I will simulate some data that follows the model above, and we will use kernel methods to estimate the survival.
+
+```{r uni.sim}
+# generating two predictor variables, x and y
+  n = 1500
+  set.seed(568)
+  sjosmooth = tibble(x = seq(from = 0, to = 1, length.out = n))
+
+# simulating the time to event outcome assuming a correct Cox model
+sjosmooth = mutate(sjosmooth,
+                   xb = x,
+                   time = -log(runif(n, 0, 1)) * exp(-xb),
+                   # getting the true survival probabilites at time 1 using x
+                   survt1.x = exp(-exp(xb)))
+```
+I'l check my simulations now to ensure that the data was simulated accurately.  The \beta coefficient from the Cox model should be near 1.
+
+```{r uni.cox}
+mod = coxph(Surv(time) ~ x, data = sjosmooth)
+summary(mod)
+```
+The estiamted coefficent is `r round(mod$coefficients, 3)`--very clsoe to 1 as expected.
+
+Now, I'll estimate estimate the survial function above using kernel smoothing with the `sjosmooth` package. Here's a brief description of each of the function arguments.
+
+`formula = Surv(time) ~ x` specifies the functional form of the model.
+
+`data = sjosmooth` specifes the tibble or data frame. 
+
+`time = 1` timepoint when survival will be estimated
+`lambda = 0.2` sepcifies the radies of the Epanechnikov kernel (the default kernel, the interpretation of lamda differs by the kernel being used).  When estimating the survival at x=0.5, for example, all observations within lambda units will be included in that estimation.
+
+`grid = tibble(x = seq(0, 1, by = 0.05))` this optional statement provides a tibble or data frame with covariate values that the kernel estiamtion will be performed at. If `grid` is not specifed, the kernel estiamtion will be performed at every unique value of the covarite(s).  The sjosmooth dataset has `r length(unique(sjosmooth$x))` unique covariate values.  In this setting the grid option saves much computation time.
+
+```{r uni.smooth}
+# perform the kernal smoothing
+newdata = tibble(x = seq(0, 1, by = 0.05),
+                 time = 1)
+newdata$survival = sm.timeto(formula = Surv(time) ~ x, 
+                             data = sjosmooth, 
+                             lambda = 0.3, 
+                             newdata = newdata)
+# plotting the true and estiamted survival functions.
+ggplot() + 
+  geom_line(data = newdata,   aes(y = survival,  x = x)) +
+  geom_line(data = sjosmooth, aes(y = survt1.x,  x = x), linetype = "dashed") +
+  scale_y_continuous(limits = c(0,1))
+  
+```
+
+
+
+#### Example 2: Estimating survival functions with non-linear features 
+The previous could have been easiyl estiatmed with out kernel smoothing becuase of the linear relationship.  But when the relationship between the covariates and survival is non-linear kernel smoothing is particulalry useful.
+
+$$
+h(t) = h_0(t)e^{12 (x - 0.5)^3} = e^{12(x - 0.5)^3}
+$$
+
+
+As in the last example, I'll simulate data.
+
+```{r uni.sim.nonlin}
+# generating two predictor variables, x and y
+  n = 1500
+  set.seed(568)
+  sjosmooth = tibble(x = seq(from = 0, to = 1, length.out = n))
+
+# simulating the time to event outcome assuming a correct Cox model
+sjosmooth = mutate(sjosmooth,
+                   xb = 12*(x - 0.5)^3,
+                   time = -log(runif(n, 0, 1)) * exp(-xb),
+                   # getting the true survival probabilites at time 1 using x
+                   survt1.x = exp(-exp(xb)))
+```
+
+Now, I'll estimate estimate the survial function above using kernel smoothing useing the `sjosmooth` package. I'll use the same options as in the previous example.
+
+```{r uni.smooth.nonline}
+# perform the kernal smoothing
+newdata = tibble(x = seq(0, 1, by = 0.05),
+                 time = 1)
+newdata$survival = sm.timeto(formula = Surv(time) ~ x, 
+                             data = sjosmooth, 
+                             lambda = 0.3, 
+                             newdata = newdata)
+# plotting the true and estiamted survival functions.
+ggplot() + 
+  geom_line(data = newdata,   aes(y = survival,  x = x)) +
+  geom_line(data = sjosmooth, aes(y = survt1.x,  x = x), linetype = "dashed") +
+  scale_y_continuous(limits = c(0,1))
+  
+```
+
+
+#### Example 3: Choosing /lambda
+Let's repeat the previous example, but show the results using varying choices of the \lambda parameter. I'll continue using the Epanechnikov kernel, and illustate how the results change with carying choices of \lambda.  Recall that \lambda is the radius of the kernel, meaning that observations whose distance is less than \lambda units from the  estimation point, $x_0$, will be included in the survival estimation.  Observations closest to $x_0$ will be the most heavily wieghted, while points further from $x_0$ but still closer than \lambda untis away will have less weight.
+
+$$
+h(t) = h_0(t)e^{12 (x - 0.5)^3} = e^{12(x - 0.5)^3}
+$$
+
+Now, I'll estimate estimate the survial function above using kernel smoothing useing the `sjosmooth` package. I'll use the same options as in the previous example, and perform the estimation at $\lambda \in {0.05, 0.2, 0.5}$.
+
+```{r uni.smooth.lambdas}
+# perform the kernal smoothing for each of the lambdas
+lambda = c(0.05, 0.3, 1)
+
+newdata = tibble(x = seq(0, 1, by = 0.05),
+                 time = 1)
+# output is a list, with each element the output for sm.timeto for each of the lambda values
+est0 = map(lambda, ~ bind_cols(newdata,
+                               survival = sm.timeto(formula = Surv(time) ~ x, 
+                                                    data = sjosmooth, 
+                                                    lambda = .x, 
+                                                    newdata = newdata)))
+```
+
+```{r plt.lmbds}
+# adding the lambda parameter to the list of tibble results
+est.n = nrow(est0[[1]])
+est = map2(est0, lambda, ~ bind_cols(.x, tibble(lambda = rep(.y, est.n)))) %>%
+  # appending the results into a single tibble
+  bind_rows(.)
+
+# plotting results
+ggplot() +
+  geom_line(data = est, aes(y = survival, x = x, color = as.factor(lambda))) +
+  geom_line(data = sjosmooth, aes(y = survt1.x,  x = x), linetype = "dashed") +
+  labs(color = expression(lambda)) +
+  scale_y_continuous(limits = c(0,1)) +
+  theme(legend.position = c(0.9, 0.81))
+
 ```
 
 

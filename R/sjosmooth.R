@@ -1,7 +1,7 @@
 #' sjosmooth: A package for perform n-dimensional kernel smoothing for Cox proportional hazards regression models.
 #'
 #' @section sjosmooth functions:
-#' sm.coxph
+#' sm.timeto
 #'
 #' @docType package
 #' @name sjosmooth
