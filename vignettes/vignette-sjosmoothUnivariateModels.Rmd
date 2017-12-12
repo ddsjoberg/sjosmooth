@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
 require(ggplot2)
 ```
 
+[![Coverage Status](https://img.shields.io/codecov/c/github/ddsjoberg/sjosmooth/master.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master)
+
 ## Introduction `sjosmooth`
 The `sjosmooth` package (pronounced sō smüt͟h) was built to perform kernel smoothing on censored time-to-event or survival data.  The package provides kernel smoothed estimates of survival probabilities at specified times.  The `sm` package is closely related to the `sjosmooth` package in that it also performs kernel smoothing with censored time-to-event data; however, the `sm` package only allows for univariate estimation of a survival quantile (i.e. median survival time) using the Gaussain kernel (`sm::sm.survival()`).  `sjosmooth` allows for the use of other kernels and for an n-dimensional covarite matrix.
 
