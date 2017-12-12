@@ -9,11 +9,12 @@
 #' Do not include transformed variables in the formula (e.g. \code{Surv(time, dead) ~ log(x) + y})--the specified
 #' \code{lambda} will no longer be interpretable.
 #' @param data A data.frame or tibble with named columns with the columns specifed in formula.
-#' @param pred.time The time at which the function will estimate the survival probabilites.
+#' @param time The time at which the function will estimate the survival probabilites.
 #' @param grid A data.frame or tibble with named columns that are the covaraites specified in formula.
 #' Survival probabilities will only be estimated at these points if specified.  Otherwise, survival probabilities
 #' will be estimated at each unique combination of the observed covaraites.
 #' @param type Specifes the type of statistic that will be calculated.  Default is \code{survival}.
+#' @param model Specifes the type of model that will be used for the estimation  Default is \code{coxph}.
 #' @param lambda The radius of the kernel for tri-cubic and Epanechnikov kernels.
 #' The standard deviation for the Gaussian kernel.
 #' @param kernel Specifies the kernel to be used: \code{epanechnikov}, \code{tricube}, \code{gaussian}, and \code{knn} are accepted.
@@ -24,12 +25,11 @@
 #' If includeing 2 or more covariates, scale should be set to \code{TRUE}.
 #' @param details Default is FALSE. If TRUE, the survival::coxph object will be returned along the the predictions.
 #' @return A data.frame or tibble with the covariates and the estiamted survival probability.
-#' @importFrom survival coxph
 #' @importFrom survival Surv
 #' @export
-sm.coxph = function(formula, data, pred.time = 1, grid = NULL,
-                    type = "survival", lambda = 1, kernel = "epanechnikov",
-                    dist.method = "euclidean", knn = NULL, scale = FALSE, details = FALSE){
+sm.timeto = function(formula, data, time = NULL, lambda = 1, grid = NULL,
+                     type = "survival", kernel = "epanechnikov", dist.method = "euclidean",
+                     model = "coxph", knn = NULL, scale = FALSE, details = FALSE){
 
   #converting formula to string (if not already)
   if(class(formula) == "formula") formula = deparse(formula)
@@ -45,73 +45,59 @@ sm.coxph = function(formula, data, pred.time = 1, grid = NULL,
   # Scaling covariates to mean 0 and SD 1 if requested
   if (scale == TRUE){
     data.scaled = scale(data[covars])
-      #saving out mean and SD vectors
-      means = attributes(data.scaled)$`scaled:center`
-      sds = attributes(data.scaled)$`scaled:scale`
+    #saving out mean and SD vectors
+    means = attributes(data.scaled)$`scaled:center`
+    sds = attributes(data.scaled)$`scaled:scale`
 
-      # adding the outcome variable (all analyses will be done on the scaled data)
-      data = cbind(data[outcome], data.scaled)
+    # adding the outcome variable (all analyses will be done on the scaled data)
+    data = cbind(data[outcome], data.scaled)
   }
 
   # which points to calculate the weighted estimates for
-    if(is.null(grid) == TRUE){ # default is observed observations
-      # keeping unique combinations of covars
-      grid = unique(data[covars])
-    } else if(is.null(grid) == FALSE){ # if grid of points was provided in function call
-      # keeping unique combinations of covars
-      grid = unique(grid[covars])
+  if(is.null(grid) == TRUE){ # default is observed observations
+    # keeping unique combinations of covars
+    grid = unique(data[covars])
+  } else if(is.null(grid) == FALSE){ # if grid of points was provided in function call
+    # keeping unique combinations of covars
+    grid = unique(grid[covars])
 
-      #scaling data to mean 0 and sd 1
-      if (scale == TRUE) grid = (grid - means)/sds
-    }
+    #scaling data to mean 0 and sd 1
+    if (scale == TRUE) grid = (grid - means)/sds
+  }
 
   # computing weighted results
   results =
     tibble::tibble(
       # extracting each row from grid and saving as it's own data.frame
-      tbl0 = apply(grid, 1, function(x) tibble::as.tibble(t(x))),
-      # saving a copy of the data for each row in the grid (will calculate different weights for each of these sets)
-      tbl  = rep(list(data), nrow(grid))
+      tbl0 = apply(grid, 1, function(x) tibble::as.tibble(t(x)))
     ) %>%
     dplyr::mutate(
       #calculating the kernel
-      tbl = sjosmooth.kernel(tbl0, tbl, kernel, dist.method, lambda, covars),
+      K = sjosmooth.kernel(tbl0, data, kernel, dist.method, lambda, covars),
 
-      # building cox models, returning NA if error
-      coxph = purrr::map(tbl, ~ tryCatch(survival::coxph(formula = stats::as.formula(formula),
-                                                         data = .x,
-                                                         weights = K),
-                                         error=function(e) NA)),
+      # building models, returning NA if error
+      model.obj = sjosmooth.model(model, formula, data, K),
 
       # calculating predictions on estimating point (tbl0)
-      pred = prediction.type(type, coxph, tbl0, pred.time, outcome)
-     ) %>%
-    dplyr::select(tbl0, pred, coxph, tbl) %>%
+      !!type := sjosmooth.prediction(type, model.obj, tbl0, time, outcome)
+    ) %>%
     tidyr::unnest(tbl0)
-  print("Print tbl (with weights calculated)")
-  print(results$tbl[1][[1]])
-  print("Print cox model")
-  print(results$coxph[1][[1]])
-
-    #dropping cox model unless details == TRUE
-    if (details == F) {
-      results = results %>%
-        dplyr::select_(.dots = c(covars,"pred"))
-    } else if (details == T) {
-      results = results %>%
-        dplyr::select_(.dots = c(covars,"pred", "tbl", "coxph"))
-    }
 
   #scaling covariates data back to original scale
   if (scale == TRUE) results[covars] = results[covars]*sds + means
 
+  # only keep covarates and new estimates if no additional details requested
+  if (details == F) results = results[c(covars,type)]
+
   return(results)
 }
+
+
 
 # this simple function adds a variable to a tibble or data frame
 # most useful for adding columns to tibbles within a list when the variable name is a string
 # for example,
-# tbl0 = purrr::map(tbl0, ~ add.var(data = .x, varname = outcome[1], varvalue = pred.time))
+# tbl0 = purrr::map(tbl0, ~ add.var(data = .x, varname = outcome[1], varvalue = time))
 add.var = function(data , varname, varvalue){
   data[[varname]] <- with(data, varvalue)
   return(data)
@@ -119,10 +105,10 @@ add.var = function(data , varname, varvalue){
 
 
 # this function calculates the kernels
-sjosmooth.kernel = function(tbl0, tbl, kernel, dist.method, lambda, covars, knn) {
+sjosmooth.kernel = function(tbl0, data, kernel, dist.method, lambda, covars, knn) {
   # calculating distance between estimation point (in tbl0), and actual data (in tbl)
-  dist = purrr::map2(tbl0, tbl,
-                     ~ as.matrix(dist(dplyr::bind_rows(.x, .y)[covars], method = dist.method))[-1,1])
+  dist = purrr::map(tbl0,
+                    ~ as.matrix(dist(dplyr::bind_rows(.x[covars], data[covars])[covars], method = dist.method))[-1,1])
 
   # calculating weights, and adding to tbl
   if (kernel == "epanechnikov") {
@@ -138,26 +124,45 @@ sjosmooth.kernel = function(tbl0, tbl, kernel, dist.method, lambda, covars, knn)
     ##  PUT ERROR for not selecting appropriate kernel
   }
 
-  #attaching K to the tbl, deleting observations with zero weight
-  tbl = purrr::map2(tbl, K, ~ dplyr::bind_cols(.x, tibble::tibble(K = .y)) %>% dplyr::filter(K>0) )
+  return(K)
+}
 
-  return(tbl)
+# this function builds the model
+sjosmooth.model = function(model, formula, data, K){
+
+  if (model == "coxph"){
+    # building cox models, returning NA if error
+    model.obj = purrr::map(K, ~ tryCatch(survival::coxph(formula = stats::as.formula(formula),
+                                                         data =  data[which(.x>0),],
+                                                         weights = .x[which(.x>0) ]),
+                                         error=function(e){
+                                           #printing error and returning NA
+                                           print(e)
+                                           return(NA)
+                                         }))
+  } else {
+    # return error for not selecting appropraite model
+  }
+
+  return(model.obj)
 }
 
 #this function calculates various types of predictions
-prediction.type = function(type, coxph, tbl0, pred.time, outcome){
+sjosmooth.prediction = function(type, model.obj, tbl0, time, outcome){
 
   # calculating survival probabilites
   if (type == "survival"){
-    # adding pred.time to tbl0 object
-    tbl0 = purrr::map(tbl0, ~ add.var(data = .x, varname = outcome[1], varvalue = pred.time))
+    # adding time to tbl0 object
+    tbl0 = purrr::map(tbl0, ~ add.var(data = .x, varname = outcome[1], varvalue = time))
 
     # calculating the survival probability
-    pred = exp(-purrr::map2_dbl(coxph, tbl0,
+    pred = exp(-purrr::map2_dbl(model.obj, tbl0,
                                 ~ tryCatch(stats::predict(object = .x,
                                                           newdata = .y,
                                                           type = "expected"),
                                            error=function(e) NA)))
+  } else {
+    ### return error for not selecting an appropriate outcome
   }
 
   return(pred)
