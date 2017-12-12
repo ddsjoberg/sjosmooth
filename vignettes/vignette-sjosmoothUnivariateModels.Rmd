@@ -4,7 +4,7 @@ author: "Daniel D. Sjoberg"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{sjosmooth: Theory and Methods}
+  %\VignetteIndexEntry{sjosmooth: One predictor smoothing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
