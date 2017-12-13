@@ -3,6 +3,7 @@ output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- [![Coverage Status](https://img.shields.io/codecov/c/github/ddsjoberg/sjosmooth/master.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master) --> 
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
