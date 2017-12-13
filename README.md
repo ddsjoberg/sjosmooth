@@ -1,5 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- [![Coverage Status](https://img.shields.io/codecov/c/github/ddsjoberg/sjosmooth/master.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master) -->
 <img src="man/figures/logo.png" align="right" />
 ================================================
 
