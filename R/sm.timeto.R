@@ -137,7 +137,7 @@ sjosmooth.kernel = function(tbl, data, kernel, dist.method, lambda, covars, knn)
     K = sqrt(2*pi*lambda^2)^-length(covars) * exp(-0.5/lambda^2 * dist^2)
   } else if (kernel == "knn") {
     if (kernel == "knn" & is.null(knn)) stop('knn must be specified when kernal == "knn"')
-    K = ifelse(rank(.x, ties.method = "min") <= knn, 1, 0)
+    K = ifelse(rank(dist, ties.method = "min") <= knn, 1, 0)
   } else {
     ##  PUT ERROR for not selecting appropriate kernel
     stop(paste("kernel ==", kernel, "not an accepted input."))
