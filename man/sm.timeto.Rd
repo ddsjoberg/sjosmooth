@@ -6,8 +6,8 @@
 \usage{
 sm.timeto(formula, data, lambda = 1, newdata = NULL, type = "survival",
   kernel = c("epanechnikov", "tricube", "gaussian", "knn"),
-  dist.method = "euclidean", model = "coxph", knn = NULL,
-  scale = as.logical(length(covars > 1)), details = FALSE)
+  dist.method = "euclidean", model = "coxph", knn = NULL, scale = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{formula}{The formula call used by \code{survival::coxph(formula = Surv(time, dead) ~ x + y)}.
@@ -39,6 +39,8 @@ to include for each point estimate.}
 \item{scale}{If TRUE, the covariates are scaled to mean 0 and standard deviation 1 prior to kernel smoothing.
 For one covariate the default is scale = FALSE, and for 2 of more covariates the default is scale = TRUE.
 If including 2 or more covariates, scale should be set to \code{TRUE}.}
+
+\item{verbose}{Default is \code{FALSE}.  If \code{TRUE}, additional results will be return as attributes, and more detailed errors will be printed.}
 }
 \value{
 A vector with the estimated survival probability.

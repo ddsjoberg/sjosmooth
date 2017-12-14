@@ -25,6 +25,7 @@
 #' If including 2 or more covariates, scale should be set to \code{TRUE}.
 #' @param knn Only used with \code{kernel == "knn"}.  Positive integer that specifies how many observations (k-nearest neighbors)
 #' to include for each point estimate.
+#' @param verbose Default is \code{FALSE}.  If \code{TRUE}, additional results will be return as attributes, and more detailed errors will be printed.
 #' @return A vector with the estimated survival probability.
 #' @importFrom survival Surv
 #' @export
@@ -33,7 +34,7 @@ sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
                      kernel = c("epanechnikov", "tricube", "gaussian", "knn"),
                      dist.method = "euclidean",
                      model = "coxph",
-                     knn = NULL, scale = as.logical(length(covars>1)), details = FALSE){
+                     knn = NULL, scale = FALSE, verbose = FALSE){
   # checking function inputs
   type =        match.arg(type)
   kernel =      match.arg(kernel)
@@ -59,10 +60,6 @@ sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
   # Scaling covariates to mean 0 and SD 1 if requested
   if (scale == TRUE){
     data.scaled = scale(data[covars])
-    #saving out mean and SD vectors
-    means = attributes(data.scaled)$`scaled:center`
-    sds = attributes(data.scaled)$`scaled:scale`
-
     # adding the outcome variable (all analyses will be done on the scaled data)
     data[covars] = data.scaled
   }
@@ -82,7 +79,8 @@ sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
     # keeping unique combinations of covars
     newdata = newdata[newdata.vars]
     #scaling data to mean 0 and sd 1
-    if (scale == TRUE) newdata[covars] = (newdata[covars] - means)/sds
+    if (scale == TRUE) newdata[covars] = (newdata[covars] - attributes(data.scaled)$`scaled:center`) /
+                                                          attributes(data.scaled)$`scaled:scale`
 
     newdata.uniq = unique(newdata)
   }
@@ -94,20 +92,34 @@ sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
   K = purrr::map(tbl, ~ sjosmooth.kernel(.x, data, kernel, dist.method, lambda, covars))
 
   # building models, returning NA if error
-  model.obj = purrr::map(K, ~ sjosmooth.model(model, formula, data, .x))
+  model.obj = purrr::map(K, ~ sjosmooth.model(model, formula, data, .x, verbose))
 
   # calculating predictions on estimating point (tbl)
-  preds = purrr::map2_dbl(tbl, model.obj, ~ sjosmooth.prediction(type, .y, .x, outcome))
+  preds = purrr::map2_dbl(tbl, model.obj, ~ sjosmooth.prediction(type, .y, .x, outcome, verbose))
+
+  # extra results to be returned if requested
+  if (verbose == TRUE) verbose.results = tibble::tibble(tbl = tbl,
+                                                        K = K,
+                                                        model.obj = model.obj,
+                                                        preds)
 
   # converting the list of tbls to a single data frame
-  tbl = do.call("rbind", tbl)
+  tbl = dplyr::bind_rows(tbl)
 
   # binding predictions and covariates, merging back in with original data
-  tbl = add.var(tbl , type, preds)
+  tbl = add.var(tbl, type, preds)
   tbl = dplyr::left_join(newdata, tbl, by = c(outcome[1], covars))
 
-  # appending all results and returning
-  return(as.vector(tbl[type][[1]]))
+  # extracting kernerl smoothed vector from tibble
+  result = as.vector(tbl[type][[1]])
+
+  # adding prediction type to attributes
+  attributes(result)$`type` = type
+  # adding additional output if verbose == TRUE
+  if (verbose == TRUE) attributes(result)$`verbose.results` = verbose.results
+
+  # Returning kernel smoothed estimate
+  return(result)
 }
 
 
@@ -122,7 +134,7 @@ sjosmooth.kernel = function(tbl, data, kernel, dist.method, lambda, covars, knn)
   } else if (kernel == "tricube") {
     K = ifelse((dist / lambda) <= 1, (1 - (dist / lambda)^3)^3, 0)
   } else if (kernel == "gaussian") {
-    K = sqrt(2*pi*lamda^2)^-length(covars) * exp(-0.5/lambda^2 * dist^2)
+    K = sqrt(2*pi*lambda^2)^-length(covars) * exp(-0.5/lambda^2 * dist^2)
   } else if (kernel == "knn") {
     if (kernel == "knn" & is.null(knn)) stop('knn must be specified when kernal == "knn"')
     K = ifelse(rank(.x, ties.method = "min") <= knn, 1, 0)
@@ -137,7 +149,7 @@ sjosmooth.kernel = function(tbl, data, kernel, dist.method, lambda, covars, knn)
 
 
 # this function builds the model
-sjosmooth.model = function(model, formula, data, K){
+sjosmooth.model = function(model, formula, data, K, verbose){
 
   if (model == "coxph"){
     # building cox models, returning NA if error
@@ -147,6 +159,7 @@ sjosmooth.model = function(model, formula, data, K){
                          error=function(e){
                            #printing error and returning NA
                            message("Error in survival::coxph : NAs introduced")
+                           if (verbose == TRUE) print(e)
                            return(NA)
                          })
   } else {
@@ -159,7 +172,7 @@ sjosmooth.model = function(model, formula, data, K){
 
 
 #this function calculates various types of predictions
-sjosmooth.prediction = function(type, model.obj, tbl, outcome){
+sjosmooth.prediction = function(type, model.obj, tbl, outcome, verbose){
 
   # calculating survival probabilities
   if (type == "survival"){
@@ -167,7 +180,12 @@ sjosmooth.prediction = function(type, model.obj, tbl, outcome){
     pred = exp(- tryCatch(stats::predict(object = model.obj,
                                          newdata = tbl,
                                          type = "expected"),
-                          error=function(e) NA))
+                          error=function(e){
+                            #printing error and returning NA
+                            message("Error in predict : NAs introduced")
+                            if (verbose == TRUE) print(e)
+                            return(NA)
+                          }))
   } else {
     ### return error for not selecting an appropriate outcome
     stop(paste("type ==", type, "not an accepted input."))

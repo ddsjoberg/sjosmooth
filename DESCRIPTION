@@ -10,17 +10,19 @@ Depends:
 Imports:
     dplyr (>= 0.7.4),
     purrr (>= 0.2.4),
+    knitr,
     stats,
+    tidyr,
+    tibble,
+    usethis,
     survival (>= 2.41-3)
 Suggests:
     testthat (>= 1.0.2),
-    knitr,
+    tidyverse,
     rmarkdown,
     ggplot2,
     plotly, 
     covr, 
-    tidyverse, 
-    usethis
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
