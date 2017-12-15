@@ -25,6 +25,7 @@
 #' If including 2 or more covariates, scale should be set to \code{TRUE}.
 #' @param knn Only used with \code{kernel == "knn"}.  Positive integer that specifies how many observations (k-nearest neighbors)
 #' to include for each point estimate.
+#' @param quantile If \code{type = "quantile"}, specify the quantile to be estimates with a number between 0 and 1.
 #' @param verbose Default is \code{FALSE}.  If \code{TRUE}, additional results will be return as attributes, and more detailed errors will be printed.
 #' @return A vector with the estimated survival probability.
 #' @importFrom survival Surv
