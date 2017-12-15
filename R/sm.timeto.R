@@ -158,7 +158,7 @@ sjosmooth.model = function(model, formula, data, K, verbose){
                                          weights =  K[which(K>0) ]),
                          error=function(e){
                            #printing error and returning NA
-                           message("Error in survival::coxph : NAs introduced")
+                           message("Error in survival::coxph : verbose = TRUE to see errors")
                            if (verbose == TRUE) print(e)
                            return(NA)
                          })
@@ -182,7 +182,7 @@ sjosmooth.prediction = function(type, model.obj, tbl, outcome, verbose){
                                          type = "expected"),
                           error=function(e){
                             #printing error and returning NA
-                            message("Error in predict : NAs introduced")
+                            message("Error in predict : NAs introduced, verbose = TRUE to see errors")
                             if (verbose == TRUE) print(e)
                             return(NA)
                           }))
