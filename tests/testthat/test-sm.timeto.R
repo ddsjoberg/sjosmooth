@@ -4,7 +4,19 @@ newdata = tibble::tibble(x = seq(0.1, 0.9, length.out = 3),
                          time.true = 1)
 
 
-test_that("Simple case runs without error", {
+test_that("Simple case runs without error, testing survival, failure, and expected type", {
+  expect_error(
+    purrr::map(c("survival", "failure", "expected"),
+               ~ sm.timeto(formula = Surv(time.true) ~ x,
+                           data = sjosmooth.tbl,
+                           newdata = newdata,
+                           type = .x))
+    , NA
+  )
+})
+
+
+test_that("Simple case runs without error, testing epanechnikov, tricube, and gaussian kernels ", {
   expect_error(
     purrr::map(c("epanechnikov", "tricube", "gaussian"),
                ~ sm.timeto(formula = Surv(time.true) ~ x,

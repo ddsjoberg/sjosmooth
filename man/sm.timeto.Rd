@@ -4,10 +4,10 @@
 \alias{sm.timeto}
 \title{n-dimensional kernel-smoothed survival probabilities}
 \usage{
-sm.timeto(formula, data, lambda = 1, newdata = NULL, type = "survival",
-  kernel = c("epanechnikov", "tricube", "gaussian", "knn"),
-  dist.method = "euclidean", model = "coxph", knn = NULL, scale = FALSE,
-  verbose = FALSE)
+sm.timeto(formula, data, lambda = 1, newdata = NULL, type = c("survival",
+  "failure", "expected", "median", "quantile"), kernel = c("epanechnikov",
+  "tricube", "gaussian", "knn"), dist.method = "euclidean", model = "coxph",
+  scale = FALSE, knn = NULL, quantile = NULL, verbose = FALSE)
 }
 \arguments{
 \item{formula}{The formula call used by \code{survival::coxph(formula = Surv(time, dead) ~ x + y)}.
@@ -33,12 +33,12 @@ Any distance measure accepted by \code{stats::dist} is acceptable.}
 
 \item{model}{Specifies the type of model that will be used for the estimation  Default is \code{coxph}.}
 
-\item{knn}{Only used with \code{kernel == "knn"}.  Positive integer that specifies how many observations (k-nearest neighbors)
-to include for each point estimate.}
-
 \item{scale}{If TRUE, the covariates are scaled to mean 0 and standard deviation 1 prior to kernel smoothing.
 For one covariate the default is scale = FALSE, and for 2 of more covariates the default is scale = TRUE.
 If including 2 or more covariates, scale should be set to \code{TRUE}.}
+
+\item{knn}{Only used with \code{kernel == "knn"}.  Positive integer that specifies how many observations (k-nearest neighbors)
+to include for each point estimate.}
 
 \item{verbose}{Default is \code{FALSE}.  If \code{TRUE}, additional results will be return as attributes, and more detailed errors will be printed.}
 }

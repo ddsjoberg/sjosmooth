@@ -30,11 +30,11 @@
 #' @importFrom survival Surv
 #' @export
 sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
-                     type = "survival",
+                     type = c("survival", "failure", "expected", "median", "quantile"),
                      kernel = c("epanechnikov", "tricube", "gaussian", "knn"),
                      dist.method = "euclidean",
-                     model = "coxph",
-                     knn = NULL, scale = FALSE, verbose = FALSE){
+                     model = "coxph", scale = FALSE,
+                     knn = NULL, quantile = NULL, verbose = FALSE){
   # checking function inputs
   type =        match.arg(type)
   kernel =      match.arg(kernel)
@@ -95,7 +95,7 @@ sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
   model.obj = purrr::map(K, ~ sjosmooth.model(model, formula, data, .x, verbose))
 
   # calculating predictions on estimating point (tbl)
-  preds = purrr::map2_dbl(tbl, model.obj, ~ sjosmooth.prediction(type, .y, .x, outcome, verbose))
+  preds = purrr::map2_dbl(tbl, model.obj, ~ sjosmooth.prediction(type, .y, .x, outcome, quantile, verbose))
 
   # extra results to be returned if requested
   if (verbose == TRUE) verbose.results = tibble::tibble(tbl = tbl,
@@ -108,7 +108,7 @@ sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
 
   # binding predictions and covariates, merging back in with original data
   tbl = add.var(tbl, type, preds)
-  tbl = dplyr::left_join(newdata, tbl, by = c(outcome[1], covars))
+  tbl = dplyr::left_join(newdata, tbl, by = newdata.vars)
 
   # extracting kernerl smoothed vector from tibble
   result = as.vector(tbl[type][[1]])
@@ -172,20 +172,38 @@ sjosmooth.model = function(model, formula, data, K, verbose){
 
 
 #this function calculates various types of predictions
-sjosmooth.prediction = function(type, model.obj, tbl, outcome, verbose){
+sjosmooth.prediction = function(type, model.obj, tbl, outcome, quantile, verbose){
 
-  # calculating survival probabilities
-  if (type == "survival"){
+  # calculating "survival", "failure", "expected"
+  if (type %in% c("survival", "failure", "expected")){
+    # calculating expected
+    pred = tryCatch(stats::predict(object = model.obj,
+                                   newdata = tbl,
+                                   type = "expected"),
+                    error=function(e){
+                      #printing error and returning NA
+                      message("Error in predict : NAs introduced, verbose = TRUE to see errors")
+                      if (verbose == TRUE) print(e)
+                      return(NA)
+                    })
     # calculating the survival probability
-    pred = exp(- tryCatch(stats::predict(object = model.obj,
-                                         newdata = tbl,
-                                         type = "expected"),
-                          error=function(e){
-                            #printing error and returning NA
-                            message("Error in predict : NAs introduced, verbose = TRUE to see errors")
-                            if (verbose == TRUE) print(e)
-                            return(NA)
-                          }))
+    if (type %in% c("survival", "failure")) pred = exp(- pred)
+    # calculating the failure probability
+    if (type %in% c("failure")) pred = 1 - pred
+
+  } else if (type %in% c("median", "quantile")) {
+    # calculating the survival quantile
+    if (type == "median") quantile = 0.5
+
+    pred = tryCatch(stats::quantile(survival::survfit(model.obj,
+                                                      newdata = tbl),
+                                    probs = quantile)$quantile,
+                    error=function(e){
+                      #printing error and returning NA
+                      message("Error in survfit/quantile : NAs introduced, verbose = TRUE to see errors")
+                      if (verbose == TRUE) print(e)
+                      return(NA)
+                    })
   } else {
     ### return error for not selecting an appropriate outcome
     stop(paste("type ==", type, "not an accepted input."))
