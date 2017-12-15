@@ -6,9 +6,11 @@ newdata = tibble::tibble(x = seq(0.1, 0.9, length.out = 3),
 
 test_that("Simple case runs without error", {
   expect_error(
-    sm.timeto(formula = Surv(time.true) ~ x,
-              data = sjosmooth.tbl,
-              newdata = newdata)
+    purrr::map(c("epanechnikov", "tricube", "gaussian"),
+               ~ sm.timeto(formula = Surv(time.true) ~ x,
+                           data = sjosmooth.tbl,
+                           newdata = newdata,
+                           kernel = .x))
     , NA
   )
 })
@@ -59,6 +61,16 @@ test_that("All dist.methods function properly", {
                            data = sjosmooth.tbl,
                            newdata = newdata,
                            dist.method = .x))
+    , NA
+  )
+})
+
+test_that("Testing knn", {
+  expect_error(
+    sm.timeto(formula = Surv(time.true) ~ x,
+              data = sjosmooth.tbl,
+              newdata = newdata,
+              kernel = "knn", knn = 100)
     , NA
   )
 })

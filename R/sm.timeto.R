@@ -89,7 +89,7 @@ sm.timeto = function(formula, data, lambda = 1, newdata = NULL,
   tbl = apply(newdata.uniq, 1, function(x) data.frame(t(x)))
 
   #calculating the kernel weights
-  K = purrr::map(tbl, ~ sjosmooth.kernel(.x, data, kernel, dist.method, lambda, covars))
+  K = purrr::map(tbl, ~ sjosmooth.kernel(.x, data, kernel, dist.method, lambda, covars, knn))
 
   # building models, returning NA if error
   model.obj = purrr::map(K, ~ sjosmooth.model(model, formula, data, .x, verbose))
