@@ -85,7 +85,7 @@ Now, I'll estimate estimate the survial function above using kernel smoothing wi
 # perform the kernal smoothing
 newdata = tibble(x = seq(0, 1, by = 0.05),
                  time = 1)
-newdata$survival = sm.timeto(formula = Surv(time) ~ x, 
+newdata$survival = smtime(formula = Surv(time) ~ x, 
                              data = sjosmooth, 
                              lambda = 0.3, 
                              newdata = newdata)
@@ -129,7 +129,7 @@ Now, I'll estimate estimate the survial function above using kernel smoothing us
 # perform the kernal smoothing
 newdata = tibble(x = seq(0, 1, by = 0.05),
                  time = 1)
-newdata$survival = sm.timeto(formula = Surv(time) ~ x, 
+newdata$survival = smtime(formula = Surv(time) ~ x, 
                              data = sjosmooth, 
                              lambda = 0.3, 
                              newdata = newdata)
@@ -157,9 +157,9 @@ lambda = c(0.05, 0.3, 1)
 
 newdata = tibble(x = seq(0, 1, by = 0.05),
                  time = 1)
-# output is a list, with each element the output for sm.timeto for each of the lambda values
+# output is a list, with each element the output for smtime for each of the lambda values
 est0 = map(lambda, ~ bind_cols(newdata,
-                               survival = sm.timeto(formula = Surv(time) ~ x, 
+                               survival = smtime(formula = Surv(time) ~ x, 
                                                     data = sjosmooth, 
                                                     lambda = .x, 
                                                     newdata = newdata)))

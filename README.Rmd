@@ -3,7 +3,6 @@ output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-<!-- [![Coverage Status](https://img.shields.io/codecov/c/github/ddsjoberg/sjosmooth/master.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master) --> 
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -16,9 +15,19 @@ knitr::opts_chunk$set(
 
 # sjosmooth <img src="man/figures/logo-small.png" align="right" />
 
-[![Build Status](https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master)](https://travis-ci.org/ddsjoberg/sjosmooth) 
+<!-- 
+[![Build Status](https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master)](https://travis-ci.org/ddsjoberg/sjosmooth)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/sjosmooth)](https://cran.r-project.org/package=sjosmooth)
+[![packageversion](https://img.shields.io/badge/Package%20version-0.1.0-orange.svg?style=flat-square)](commits/master)
+[![Coverage Status](https://img.shields.io/codecov/c/github/ddsjoberg/sjosmooth/master.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master)
+--> 
+[![Build Status](https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master)](https://travis-ci.org/ddsjoberg/sjosmooth)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/sjosmooth)](https://cran.r-project.org/package=sjosmooth)
 
-The goal of sjosmooth is to ...
+
+The sjosmooth package performs univariate and multivariable kernel smoothing for time to event data.  Time to event analysis is often referred to as survival analysis in medicine, reliability analysis in engineering, duration analysis or duration modelling in economics, and event history analysis in sociology.  
+
+The sjosmooth syntax is simple and modeled after existing functions. For example, if you know the syntax for Cox regression and prediction, then you're already be familiar with mostt sjosmooth syntax.  
 
 ## Installation
 
