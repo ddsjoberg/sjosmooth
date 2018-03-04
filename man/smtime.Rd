@@ -2,13 +2,13 @@
 % Please edit documentation in R/smtime.R
 \name{smtime}
 \alias{smtime}
-\title{n-dimensional kernel-smoothed survival probabilities}
+\title{Univariate and multivariable kernel smoothing with time to event outcomes.}
 \usage{
-smtime(formula, data, lambda = 1, newdata = NULL, type = c("survival",
-  "failure", "expected", "median", "quantile"), kernel = c("epanechnikov",
-  "tricube", "gaussian", "knn"), dist.method = "euclidean", model = "coxph",
-  scale = FALSE, time = NULL, knn = NULL, quantile = NULL,
-  verbose = FALSE)
+smtime(formula, data, newdata = NULL, bandwidth = 0.8, lambda = NULL,
+  type = c("survival", "failure", "expected", "median", "quantile"),
+  kernel = c("epanechnikov", "tricube", "gaussian", "knn"),
+  dist.method = "euclidean", model = "coxph", scale = FALSE,
+  time = NULL, knn = NULL, quantile = NULL, verbose = FALSE)
 }
 \arguments{
 \item{formula}{The formula call used by \code{survival::coxph(formula = Surv(time, dead) ~ x + y)}.
@@ -17,12 +17,14 @@ Do not include transformed variables in the formula (e.g. \code{Surv(time, dead)
 
 \item{data}{A data.frame or tibble with named columns with the columns specified in formula.}
 
-\item{lambda}{The radius of the kernel for tri-cubic and Epanechnikov kernels.
-The standard deviation for the Gaussian kernel.}
-
 \item{newdata}{A data.frame or tibble with named columns that are the covariates specified in formula.
 Survival probabilities will only be estimated at these points if specified.  Otherwise, survival probabilities
 will be estimated at each unique combination of the observed covariates.}
+
+\item{bandwidth}{The proportion of data to be included in each kernel-smoothed estimate.  Univariate models only.}
+
+\item{lambda}{The radius of the kernel for tri-cubic and Epanechnikov kernels.
+The standard deviation for the Gaussian kernel.}
 
 \item{type}{Specifies the type of statistic that will be calculated.  Default is \code{survival}.}
 
@@ -38,7 +40,7 @@ Any distance measure accepted by \code{stats::dist} is acceptable.}
 For one covariate the default is scale = FALSE, and for 2 of more covariates the default is scale = TRUE.
 If including 2 or more covariates, scale should be set to \code{TRUE}.}
 
-\item{time}{Optional method for speicfying one timepoint at which predictions will be evaluated (e.g. \code{type = c("survival", "expected", "failure")}).}
+\item{time}{Optional argument for specifying one timepoint at which predictions will be evaluated (e.g. \code{type = c("survival", "expected", "failure")}).}
 
 \item{knn}{Only used with \code{kernel == "knn"}.  Positive integer that specifies how many observations (k-nearest neighbors)
 to include for each point estimate.}

@@ -4,40 +4,31 @@
 # eg
 # -100, -0.5, 0, 342, 299992 would result in
 # -2, -1, 0, 1, 2
-# the function is used to define lambda when a badnwidth is supplied
+# the function is used to define lambda when a bandwidth is supplied
 rankunidist = function(x) {
 
-  # getting ranks for pos and neg separately
-  x.pos = x[x>0]
-  x.neg = x[x<0]
-  rank.pos = rank(x.pos, ties.method = "min")
-  rank.neg = -rank(-x.neg, ties.method = "min")
+  #  putting all results in dataframe
+  x.df = data.frame(x = x)
 
-  # joining ranks back into original data
-  x = dplyr::left_join(
-    data.frame(x = x),
-    data.frame(x = x.pos, rank.pos),
-    by = "x"
-  )
-  x = dplyr::left_join(
-    x,
-    data.frame(x = x.neg, rank.neg),
-    by = "x"
-  )
+  # getting ranks for pos and neg separately
+  x.df$rank = 0
+  x.df$rank[x.df$x>0] =  rank( x.df$x[x.df$x>0], ties.method = "min")
+  x.df$rank[x.df$x<0] = -rank(-x.df$x[x.df$x<0], ties.method = "min")
 
   #returning ranked results
-  dplyr::coalesce(x$rank.pos, x$rank.neg, 0L)
+  return(x.df$rank)
 }
 
 #  HELPER FUNCTION (bandwidth lambda)  ---------------------------------------------------------------
-# function to calculate lambda based on badwidth
+# function to calculate lambda based on bandwidth
 sjosmooth.bwidthlambda <- function(tbl, data, covars, bandwidth.k) {
   dist = data[covars] - as.numeric(tbl[covars])
   rank.dist = rankunidist(dist)
 
   # returning lambda
-  max(abs(dist[abs(rank.dist) <= bandwidth.k]))
+  max(abs(dist[abs(rank.dist) <= bandwidth.k, 1]))
 }  ###  THIS NEEDS TO BE CHECKED!
+
 
 
 #  HELPER FUNCTION (calculate kernel weights)  ------------------------------------------------------
@@ -95,7 +86,7 @@ sjosmooth.model <- function(model, formula, data, K, verbose){
     )
   } else {
     # return error for not selecting appropriate model
-    stop(paste("model ==", model, "not an accepted input."))
+    stop(paste("model =", model, "not an accepted input."))
   }
 
   return(model.obj)
@@ -103,7 +94,7 @@ sjosmooth.model <- function(model, formula, data, K, verbose){
 
 
 #  HELPER FUNCTION (predictions)  ---------------------------------------------------------------
-#this function calculates various types of predictions
+# this function calculates various types of predictions
 sjosmooth.prediction <-
   function(type, model.obj, tbl, outcome, quantile, verbose){
 

@@ -50,7 +50,9 @@ smtime <- function(formula, data, newdata = NULL,
   type <-        match.arg(type)
   kernel <-      match.arg(kernel)
   model <-       match.arg(model)
-  if (lambda <= 0) stop("lambda must be positive")
+  if (!is.null(lambda)) {
+    if (lambda <= 0) stop("lambda must be positive")
+  }
   if (kernel == "knn" & is.null(knn))
     stop('knn must be specified when kernal == "knn"')
 
@@ -121,7 +123,7 @@ smtime <- function(formula, data, newdata = NULL,
   # getting unique observations to save computation time (and complete)
   newdata.uniq <- unique(newdata[complete.cases(newdata), ])
 
-  # extracting each row from newdata and saving as it's own tibble
+  # extracting each row from newdata and saving as it's own data frame
   tbl <- apply(newdata.uniq, 1, function(x) data.frame(t(x)))
 
   # calculating a list of lambdas IF bandwidth is supplied
@@ -130,12 +132,19 @@ smtime <- function(formula, data, newdata = NULL,
     # number of obs that are included on each side on x0
     bandwidth.k = (nrow(data) * bandwidth - 0.5) / 2
 
+    lambda.list <- purrr::map(
+      tbl,
+      ~ sjosmooth.bwidthlambda(.x, data, covars, bandwidth.k)
+    )
+  } else {
+    # otherwise repeating the specified lambda in list
+    lambda.list <- rep(list(lambda), length(tbl))
   }
 
   #calculating the kernel weights
-  K <- purrr::map(
-    tbl,
-    ~ sjosmooth.kernel(.x, data, kernel, dist.method, lambda, covars, knn)
+  K <- purrr::map2(
+    tbl, lambda.list,
+    ~ sjosmooth.kernel(.x, data, kernel, dist.method, .y, covars, knn)
   )
 
   # building models, returning NA if error
