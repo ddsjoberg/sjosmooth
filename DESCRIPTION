@@ -7,7 +7,7 @@ Description: The sjosmooth was developed to calculate kernel-smoothed survival p
 License: MIT + file LICENSE
 Depends:
     R (>= 2.10)
-Imports:
+Imports: 
     dplyr (>= 0.7.4),
     purrr (>= 0.2.4),
     knitr,

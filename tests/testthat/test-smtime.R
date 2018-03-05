@@ -20,7 +20,7 @@ test_that("Simple case runs without error, testing survival, failure, and expect
 test_that("Simple case runs without error, testing epanechnikov, tricube, and gaussian kernels ", {
   expect_error(
     purrr::map(
-      c("epanechnikov", "tricube", "gaussian"),
+      c("epanechnikov", "tricube", "gaussian", "flat"),
       ~ smtime(formula = Surv(time.true) ~ x,
                   data = sjosmooth.tbl,
                   newdata = newdata,
@@ -80,15 +80,6 @@ test_that("All dist.methods function properly", {
   )
 })
 
-test_that("Testing knn", {
-  expect_error(
-    smtime(formula = Surv(time.true) ~ x,
-              data = sjosmooth.tbl,
-              newdata = newdata,
-              kernel = "knn", knn = 100)
-    , NA
-  )
-})
 
 
 # test_that("Median survival smoothing", {

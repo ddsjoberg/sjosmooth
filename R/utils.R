@@ -5,10 +5,10 @@
 # -100, -0.5, 0, 342, 299992 would result in
 # -2, -1, 0, 1, 2
 # the function is used to define lambda when a bandwidth is supplied
-rankunidist = function(x) {
+rankunidist = function(a) {
 
   #  putting all results in dataframe
-  x.df = data.frame(x = x)
+  x.df = data.frame(x = a)
 
   # getting ranks for pos and neg separately
   x.df$rank = 0
@@ -22,11 +22,11 @@ rankunidist = function(x) {
 #  HELPER FUNCTION (bandwidth lambda)  ---------------------------------------------------------------
 # function to calculate lambda based on bandwidth
 sjosmooth.bwidthlambda <- function(tbl, data, covars, bandwidth.k) {
-  dist = data[covars] - as.numeric(tbl[covars])
+  dist = data[[covars]] - as.numeric(tbl[covars])
   rank.dist = rankunidist(dist)
 
   # returning lambda
-  max(abs(dist[abs(rank.dist) <= bandwidth.k, 1]))
+  max(abs(dist[abs(rank.dist) <= bandwidth.k]))
 }  ###  THIS NEEDS TO BE CHECKED!
 
 
@@ -34,7 +34,7 @@ sjosmooth.bwidthlambda <- function(tbl, data, covars, bandwidth.k) {
 #  HELPER FUNCTION (calculate kernel weights)  ------------------------------------------------------
 # this function calculates the kernel weights
 sjosmooth.kernel <-
-  function(tbl, data, kernel, dist.method, lambda, covars, knn) {
+  function(tbl, data, kernel, dist.method, lambda, covars) {
 
     # calculating distance between estimation point (in tbl), and actual data
     dist <- as.matrix(
@@ -52,14 +52,11 @@ sjosmooth.kernel <-
     } else if (kernel == "gaussian") {
       K <- sqrt(2 * pi * lambda ^ 2) ^ -length(covars) *
         exp(-0.5 / lambda ^ 2 * dist ^ 2)
-    } else if (kernel == "knn") {
-      # printing error if knn not specified
-      if (kernel == "knn" & is.null(knn))
-        stop('knn must be specified when kernal == "knn"')
-      K <- ifelse(rank(dist, ties.method = "min") <= knn, 1, 0)
+    } else if (kernel == "flat") {
+      K <- ifelse(( dist / lambda ) <= 1, 1, 0)
     } else {
       ##  PUT ERROR for not selecting appropriate kernel
-      stop(paste("kernel ==", kernel, "not an accepted input."))
+      stop(paste("kernel =", kernel, "not an accepted input."))
     }
 
     return(K)

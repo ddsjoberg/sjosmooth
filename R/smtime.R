@@ -15,9 +15,9 @@
 #' @param type Specifies the type of statistic that will be calculated.  Default is \code{survival}.
 #' @param model Specifies the type of model that will be used for the estimation  Default is \code{coxph}.
 #' @param bandwidth The proportion of data to be included in each kernel-smoothed estimate.  Univariate models only.
-#' @param lambda The radius of the kernel for tri-cubic and Epanechnikov kernels.
+#' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 #' The standard deviation for the Gaussian kernel.
-#' @param kernel Specifies the kernel to be used: \code{epanechnikov}, \code{tricube}, \code{gaussian}, and \code{knn} are accepted.
+#' @param kernel Specifies the kernel to be used: \code{epanechnikov}, \code{tricube}, \code{gaussian}, and \code{flat} are accepted.
 #' Default is \code{epanechnikov}.  See vignettes for differences in methods.
 #' @param dist.method Specifies the distance measure to be used in the kernel.  Default is \code{euclidean}.
 #' Any distance measure accepted by \code{stats::dist} is acceptable.
@@ -25,8 +25,6 @@
 #' For one covariate the default is scale = FALSE, and for 2 of more covariates the default is scale = TRUE.
 #' If including 2 or more covariates, scale should be set to \code{TRUE}.
 #' @param time Optional argument for specifying one timepoint at which predictions will be evaluated (e.g. \code{type = c("survival", "expected", "failure")}).
-#' @param knn Only used with \code{kernel == "knn"}.  Positive integer that specifies how many observations (k-nearest neighbors)
-#' to include for each point estimate.
 #' @param quantile If \code{type = "quantile"}, specify the quantile to be estimates with a number between 0 and 1.
 #' @param verbose Default is \code{FALSE}.  If \code{TRUE}, additional results will be return as attributes, and more detailed errors will be printed.
 #' @return A vector with the estimated survival probability.
@@ -35,14 +33,12 @@
 smtime <- function(formula, data, newdata = NULL,
                    bandwidth = 0.8,
                    lambda = NULL,
-                   type = c("survival", "failure", "expected",
-                            "median", "quantile"),
-                   kernel = c("epanechnikov", "tricube", "gaussian", "knn"),
+                   type = c("survival", "failure", "expected", "median", "quantile"),
+                   kernel = c("epanechnikov", "tricube", "gaussian", "flat"),
                    dist.method = "euclidean",
                    model = "coxph",
                    scale = FALSE,
                    time = NULL,
-                   knn = NULL,
                    quantile = NULL,
                    verbose = FALSE){
 
@@ -53,8 +49,6 @@ smtime <- function(formula, data, newdata = NULL,
   if (!is.null(lambda)) {
     if (lambda <= 0) stop("lambda must be positive")
   }
-  if (kernel == "knn" & is.null(knn))
-    stop('knn must be specified when kernal == "knn"')
 
 
   #converting formula to string (if not already)
@@ -111,6 +105,9 @@ smtime <- function(formula, data, newdata = NULL,
          attributes(data.scaled)$`scaled:scale`
   }
 
+  # keeping only the compelte cases for the modeling
+  data = data[complete.cases(data), ]
+
   # adding/replacing a timepoint if specified
   if (is.null(time) == F && need.time == T) newdata <- add.var(newdata, outcome[1], time)
 
@@ -128,7 +125,6 @@ smtime <- function(formula, data, newdata = NULL,
 
   # calculating a list of lambdas IF bandwidth is supplied
   if (is.null(lambda) && !is.null(bandwidth)) {
-    #####################  CONTINUE UPDATING HERE
     # number of obs that are included on each side on x0
     bandwidth.k = (nrow(data) * bandwidth - 0.5) / 2
 
@@ -144,7 +140,7 @@ smtime <- function(formula, data, newdata = NULL,
   #calculating the kernel weights
   K <- purrr::map2(
     tbl, lambda.list,
-    ~ sjosmooth.kernel(.x, data, kernel, dist.method, .y, covars, knn)
+    ~ sjosmooth.kernel(.x, data, kernel, dist.method, .y, covars)
   )
 
   # building models, returning NA if error
@@ -162,11 +158,13 @@ smtime <- function(formula, data, newdata = NULL,
 
   # extra results to be returned if requested
   if (verbose == TRUE)
-    verbose.results = tibble::tibble(
-      tbl = tbl,
-      K = K,
-      model.obj = model.obj,
-      preds = preds
+    verbose.results = dplyr::bind_cols(
+      tibble::tibble(
+        K = K,
+        model.obj = model.obj,
+        preds = preds
+      ),
+      dplyr::bind_rows(tbl)
     )
 
   # converting the list of tbls to a single data frame
