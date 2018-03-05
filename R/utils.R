@@ -34,7 +34,7 @@ sjosmooth.bwidthlambda <- function(tbl, data, covars, bandwidth.k) {
 #  HELPER FUNCTION (calculate kernel weights)  ------------------------------------------------------
 # this function calculates the kernel weights
 sjosmooth.kernel <-
-  function(tbl, data, kernel, dist.method, lambda, covars, knn) {
+  function(tbl, data, kernel, dist.method, lambda, covars) {
 
     # calculating distance between estimation point (in tbl), and actual data
     dist <- as.matrix(
@@ -52,14 +52,11 @@ sjosmooth.kernel <-
     } else if (kernel == "gaussian") {
       K <- sqrt(2 * pi * lambda ^ 2) ^ -length(covars) *
         exp(-0.5 / lambda ^ 2 * dist ^ 2)
-    } else if (kernel == "knn") {
-      # printing error if knn not specified
-      if (kernel == "knn" & is.null(knn))
-        stop('knn must be specified when kernal == "knn"')
-      K <- ifelse(rank(dist, ties.method = "min") <= knn, 1, 0)
+    } else if (kernel == "flat") {
+      K <- ifelse(( dist / lambda ) <= 1, 1, 0)
     } else {
       ##  PUT ERROR for not selecting appropriate kernel
-      stop(paste("kernel ==", kernel, "not an accepted input."))
+      stop(paste("kernel =", kernel, "not an accepted input."))
     }
 
     return(K)
