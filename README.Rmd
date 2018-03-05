@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/sjosmooth)](https://cran.r-project.org/package=sjosmooth)
 [![Coverage Status](https://img.shields.io/codecov/c/github/ddsjoberg/sjosmooth/master.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master)
 
-The sjosmooth package performs univariate and multivariable kernel smoothing for time to event data.  Time to event analysis is often referred to as survival analysis in medicine, reliability analysis in engineering, duration analysis or duration modelling in economics, and event history analysis in sociology.  
+The sjosmooth package ((pronounced sō smüt͟h) performs univariate and multivariable kernel smoothing for time to event data.  Time to event analysis is often referred to as survival analysis in medicine, reliability analysis in engineering, duration analysis or duration modelling in economics, and event history analysis in sociology.  
 
 The sjosmooth syntax is simple and modeled after existing functions. For example, if you know the syntax for Cox regression and prediction, then you're already be familiar with mostt sjosmooth syntax.  
 

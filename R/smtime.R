@@ -33,8 +33,7 @@
 smtime <- function(formula, data, newdata = NULL,
                    bandwidth = 0.8,
                    lambda = NULL,
-                   type = c("survival", "failure", "expected",
-                            "median", "quantile"),
+                   type = c("survival", "failure", "expected", "median", "quantile"),
                    kernel = c("epanechnikov", "tricube", "gaussian", "flat"),
                    dist.method = "euclidean",
                    model = "coxph",
@@ -106,6 +105,9 @@ smtime <- function(formula, data, newdata = NULL,
          attributes(data.scaled)$`scaled:scale`
   }
 
+  # keeping only the compelte cases for the modeling
+  data = data[complete.cases(data), ]
+
   # adding/replacing a timepoint if specified
   if (is.null(time) == F && need.time == T) newdata <- add.var(newdata, outcome[1], time)
 
@@ -123,7 +125,6 @@ smtime <- function(formula, data, newdata = NULL,
 
   # calculating a list of lambdas IF bandwidth is supplied
   if (is.null(lambda) && !is.null(bandwidth)) {
-    #####################  CONTINUE UPDATING HERE
     # number of obs that are included on each side on x0
     bandwidth.k = (nrow(data) * bandwidth - 0.5) / 2
 
@@ -157,11 +158,13 @@ smtime <- function(formula, data, newdata = NULL,
 
   # extra results to be returned if requested
   if (verbose == TRUE)
-    verbose.results = tibble::tibble(
-      tbl = tbl,
-      K = K,
-      model.obj = model.obj,
-      preds = preds
+    verbose.results = dplyr::bind_cols(
+      tibble::tibble(
+        K = K,
+        model.obj = model.obj,
+        preds = preds
+      ),
+      dplyr::bind_rows(tbl)
     )
 
   # converting the list of tbls to a single data frame

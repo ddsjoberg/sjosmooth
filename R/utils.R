@@ -5,10 +5,10 @@
 # -100, -0.5, 0, 342, 299992 would result in
 # -2, -1, 0, 1, 2
 # the function is used to define lambda when a bandwidth is supplied
-rankunidist = function(x) {
+rankunidist = function(a) {
 
   #  putting all results in dataframe
-  x.df = data.frame(x = x)
+  x.df = data.frame(x = a)
 
   # getting ranks for pos and neg separately
   x.df$rank = 0
@@ -22,11 +22,11 @@ rankunidist = function(x) {
 #  HELPER FUNCTION (bandwidth lambda)  ---------------------------------------------------------------
 # function to calculate lambda based on bandwidth
 sjosmooth.bwidthlambda <- function(tbl, data, covars, bandwidth.k) {
-  dist = data[covars] - as.numeric(tbl[covars])
+  dist = data[[covars]] - as.numeric(tbl[covars])
   rank.dist = rankunidist(dist)
 
   # returning lambda
-  max(abs(dist[abs(rank.dist) <= bandwidth.k, 1]))
+  max(abs(dist[abs(rank.dist) <= bandwidth.k]))
 }  ###  THIS NEEDS TO BE CHECKED!
 
 
