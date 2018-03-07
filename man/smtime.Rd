@@ -44,7 +44,7 @@ If including 2 or more covariates, scale should be set to \code{TRUE}.}
 
 \item{quantile}{If \code{type = "quantile"}, specify the quantile to be estimates with a number between 0 and 1.}
 
-\item{verbose}{Default is \code{FALSE}.  If \code{TRUE}, additional results will be return as attributes, and more detailed errors will be printed.}
+\item{verbose}{Default is \code{FALSE}.  If \code{TRUE}, additional results will be returned as attributes, and more detailed errors will be printed.}
 }
 \value{
 A vector with the estimated survival probability.

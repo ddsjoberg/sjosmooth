@@ -22,8 +22,11 @@ The `sjosmooth` package (pronounced sō smüt͟h) was built to perform kernel sm
 
 I'll do a brief review of the theory underlying kernel smoothing, and a brief review on simulating time-to-event data.  Other vignettes focus on the usage of the `sjosmooth` package in the univariate setting, and for obtaiing kernel-smoothed survival estimates for 2 or more covarites. 
 
-![simplystatistics.org. loess explained in a GIF](https://raw.githubusercontent.com/simplystats/simplystats.github.io/master/_images/loess.gif)
+<left>
+![](https://raw.githubusercontent.com/simplystats/simplystats.github.io/master/_images/loess.gif){ width=40% } 
 
+simplystatistics.org. loess explained in a GIF
+</left>
 
 ## Kernel Smoothing Theory
 
@@ -38,6 +41,7 @@ ggplot(data.frame(x=c(-3, 3)), aes(x)) +
   stat_function(fun=function(x) ifelse(abs(x)<=1, (1 - abs(x)^3)^3, 0)/1.1571, aes(colour="Tri-cube")) + 
   stat_function(fun=function(x) ifelse(abs(x)<=1, 0.5, 0), aes(colour="Flat")) +
   ylab("") + xlab("") + labs(color = "") + 
+  guides(colour=guide_legend(ncol=2)) +
   theme(legend.position="bottom", 
         legend.direction="vertical",
         axis.text.y = element_blank(),
@@ -77,7 +81,16 @@ K_\lambda(x_0, x) = \frac{1}{\sqrt{2\pi\lambda^2}^N} exp\Bigg(-\frac{||x - x_0||
 $$
 where $N$ is the dimension of the covariate, or predictor, vector.  Here, the weights are defined by the Gaussian distribution and \lambda is the standard deviation.  The primary difference here is that all observations are included in the estimation at every point; although, observations further from our point estimate, $x_0$, will be included with much less weight.
 
-#### k-nearest neighbor
+#### Flat kernel
+The flat kernel gives all observations within a certain distantance equal weight.  The kernel is given by
+$$
+K_\lambda(x_0, x) = 
+\begin{cases} 
+      \frac{1}{2\lambda} & \frac{||x - x_0||}{\lambda} \le 1 \\
+      0 & \frac{||x - x_0||}{\lambda} > 1 \\
+\end{cases}
+$$
+
 
 ## Simulating time-to-event data
 
