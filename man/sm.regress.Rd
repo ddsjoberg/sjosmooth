@@ -7,7 +7,7 @@
 sm.regress(formula, data, newdata = NULL, bandwidth = 0.8, lambda = NULL,
   type = c("survival", "failure", "expected", "median", "quantile"),
   kernel = c("epanechnikov", "tricube", "gaussian", "flat"),
-  dist.method = "euclidean", model = "coxph", scale = FALSE,
+  dist.method = "euclidean", model.FUN = coxph, scale = FALSE,
   time = NULL, quantile = NULL, verbose = FALSE)
 }
 \arguments{
@@ -34,7 +34,7 @@ Default is \code{epanechnikov}.  See vignettes for differences in methods.}
 \item{dist.method}{Specifies the distance measure to be used in the kernel.  Default is \code{euclidean}.
 Any distance measure accepted by \code{stats::dist} is acceptable.}
 
-\item{model}{Specifies the type of model that will be used for the estimation  Default is \code{coxph}.}
+\item{model.FUN}{Specifies the type of model that will be used for the estimation  Default is \code{coxph}.}
 
 \item{scale}{If TRUE, the covariates are scaled to mean 0 and standard deviation 1 prior to kernel smoothing.
 For one covariate the default is scale = FALSE, and for 2 of more covariates the default is scale = TRUE.

@@ -13,7 +13,7 @@
 #' Survival probabilities will only be estimated at these points if specified.  Otherwise, survival probabilities
 #' will be estimated at each unique combination of the observed covariates.
 #' @param type Specifies the type of statistic that will be calculated.  Default is \code{survival}.
-#' @param model Specifies the type of model that will be used for the estimation  Default is \code{coxph}.
+#' @param model.FUN Specifies the type of model that will be used for the estimation  Default is \code{coxph}.
 #' @param bandwidth The proportion of data to be included in each kernel-smoothed estimate.  Univariate models only.
 #' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 #' The standard deviation for the Gaussian kernel.
@@ -30,6 +30,7 @@
 #' @return A vector with the estimated survival probability.
 #' @importFrom stats complete.cases
 #' @importFrom survival Surv
+#' @importFrom survival coxph
 #' @export
 sm.regress <- function(formula, data, newdata = NULL,
                    bandwidth = 0.8,
@@ -37,7 +38,7 @@ sm.regress <- function(formula, data, newdata = NULL,
                    type = c("survival", "failure", "expected", "median", "quantile"),
                    kernel = c("epanechnikov", "tricube", "gaussian", "flat"),
                    dist.method = "euclidean",
-                   model = "coxph",
+                   model.FUN = coxph,
                    scale = FALSE,
                    time = NULL,
                    quantile = NULL,
@@ -46,7 +47,6 @@ sm.regress <- function(formula, data, newdata = NULL,
   # checking function inputs
   type <-        match.arg(type)
   kernel <-      match.arg(kernel)
-  model <-       match.arg(model)
   if (!is.null(lambda)) {
     if (lambda <= 0) stop("lambda must be positive")
   }
@@ -147,7 +147,7 @@ sm.regress <- function(formula, data, newdata = NULL,
   # building models, returning NA if error
   model.obj <- purrr::map(
     K,
-    ~ sjosmooth.model(model, formula, data, K = .x, verbose)
+    ~ sjosmooth.model(model.FUN, formula, data, K = .x, verbose)
   )
 
   # calculating predictions on estimating point (tbl)

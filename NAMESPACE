@@ -3,3 +3,4 @@
 export(sm.regress)
 importFrom(stats,complete.cases)
 importFrom(survival,Surv)
+importFrom(survival,coxph)

@@ -1,4 +1,4 @@
-context("test-sm.coxph.R")
+context("test-sm.regress.R")
 
 newdata = tibble::tibble(x = seq(0.1, 0.9, length.out = 3),
                          time.true = 1)

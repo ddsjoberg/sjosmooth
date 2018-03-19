@@ -66,25 +66,20 @@ sjosmooth.kernel <-
 
 #  HELPER FUNCTION (build model)  ---------------------------------------------------------------
 # this function builds the model
-sjosmooth.model <- function(model, formula, data, K, verbose){
+sjosmooth.model <- function(model.FUN, formula, data, K, verbose){
 
-  if (model == "coxph"){
-    # building cox models, returning NA if error
+    # building regression models, returning NA if error
     model.obj <- tryCatch(
-      survival::coxph(formula = stats::as.formula(formula),
+      model.FUN(formula = stats::as.formula(formula),
                       data =  data[which(K > 0), ],
                       weights =  K[which(K > 0)  ]),
       error = function(e){
         #printing error and returning NA
-        message("Error in survival::coxph")
+        message(paste("Error in", quote(model.FUN), "call"))
         if (verbose == TRUE) print(e)
         return(NA)
       }
     )
-  } else {
-    # return error for not selecting appropriate model
-    stop(paste("model =", model, "not an accepted input."))
-  }
 
   return(model.obj)
 }
