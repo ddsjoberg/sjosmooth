@@ -28,9 +28,10 @@
 #' @param quantile If \code{type = "quantile"}, specify the quantile to be estimates with a number between 0 and 1.
 #' @param verbose Default is \code{FALSE}.  If \code{TRUE}, additional results will be returned as attributes, and more detailed errors will be printed.
 #' @return A vector with the estimated survival probability.
+#' @importFrom stats complete.cases
 #' @importFrom survival Surv
 #' @export
-smtime <- function(formula, data, newdata = NULL,
+sm.regress <- function(formula, data, newdata = NULL,
                    bandwidth = 0.8,
                    lambda = NULL,
                    type = c("survival", "failure", "expected", "median", "quantile"),
@@ -106,7 +107,7 @@ smtime <- function(formula, data, newdata = NULL,
   }
 
   # keeping only the compelte cases for the modeling
-  data = data[complete.cases(data), ]
+  data = data[stats::complete.cases(data), ]
 
   # adding/replacing a timepoint if specified
   if (is.null(time) == F && need.time == T) newdata <- add.var(newdata, outcome[1], time)
