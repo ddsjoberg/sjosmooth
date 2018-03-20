@@ -1,16 +1,15 @@
-#' Univariate and multivariable kernel smoothing with time to event outcomes.
+#' Univariate and multivariable kernel smoothing.
 #'
-#' The purpose of this function is to provide kernel-smoothed n-year survival
+#' The purpose of this function is to provide kernel-smoothed
 #' estimates for n-dimensional data. For example, using two predictors, x and y,
-#' predict time to death. The program estimates a hyperplane that estimates
-#' risk of death at n-years for every x, y combination.
+#' to predict an outcome. The program provides an estimated hyperplane of the outcome by x and y.
 #'
-#' @param formula The formula call used by \code{survival::coxph(formula = Surv(time, dead) ~ x + y)}.
+#' @param formula The formula call for the model. For exampe, \code{survival::coxph(formula = Surv(time, dead) ~ x + y)}.
 #' Do not include transformed variables in the formula (e.g. \code{Surv(time, dead) ~ log(x) + y})--the specified
 #' \code{lambda} will no longer be interpretable.
-#' @param data A data.frame or tibble with named columns with the columns specified in formula.
-#' @param newdata A data.frame or tibble with named columns that are the covariates specified in formula.
-#' Predictions will only be estimated at these points if specified.
+#' @param data A data.frame or tibble with named columns.
+#' @param newdata A data.frame or tibble with named columns.
+#' Predictions will only be estimated at these points, if specified.
 #' @param type Specifies the type of statistic that will be calculated.  Default is \code{survival}.
 #' @param model.FUN Specifies the type of model that will be used for the estimation  Default is \code{coxph}.
 #' @param bandwidth The proportion of data to be included in each kernel-smoothed estimate.  Univariate models only.
@@ -22,7 +21,7 @@
 #' Any distance measure accepted by \code{stats::dist} is acceptable.
 #' @param quantile If \code{type = "quantile"}, specify the quantile to be estimates with a number between 0 and 1.
 #' @param verbose Default is \code{FALSE}.  If \code{TRUE}, additional results will be returned as attributes, and more detailed errors will be printed.
-#' @return A vector with the estimated survival probability.
+#' @return A vector with the estimated (i.e. kernel-smoothed) outcomes.
 #' @importFrom stats complete.cases
 #' @importFrom survival Surv
 #' @importFrom survival coxph
