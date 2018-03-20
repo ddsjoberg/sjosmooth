@@ -4,11 +4,11 @@
 \alias{sm.regress}
 \title{Univariate and multivariable kernel smoothing with time to event outcomes.}
 \usage{
-sm.regress(formula, data, newdata = NULL, bandwidth = 0.8, lambda = NULL,
+sm.regress(formula, data, newdata, bandwidth = 0.8, lambda = NULL,
   type = c("survival", "failure", "expected", "median", "quantile"),
   kernel = c("epanechnikov", "tricube", "gaussian", "flat"),
-  dist.method = "euclidean", model.FUN = coxph, scale = FALSE,
-  time = NULL, quantile = NULL, verbose = FALSE)
+  dist.method = "euclidean", model.FUN = coxph, quantile = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{formula}{The formula call used by \code{survival::coxph(formula = Surv(time, dead) ~ x + y)}.
@@ -18,8 +18,7 @@ Do not include transformed variables in the formula (e.g. \code{Surv(time, dead)
 \item{data}{A data.frame or tibble with named columns with the columns specified in formula.}
 
 \item{newdata}{A data.frame or tibble with named columns that are the covariates specified in formula.
-Survival probabilities will only be estimated at these points if specified.  Otherwise, survival probabilities
-will be estimated at each unique combination of the observed covariates.}
+Predictions will only be estimated at these points if specified.}
 
 \item{bandwidth}{The proportion of data to be included in each kernel-smoothed estimate.  Univariate models only.}
 
@@ -35,12 +34,6 @@ Default is \code{epanechnikov}.  See vignettes for differences in methods.}
 Any distance measure accepted by \code{stats::dist} is acceptable.}
 
 \item{model.FUN}{Specifies the type of model that will be used for the estimation  Default is \code{coxph}.}
-
-\item{scale}{If TRUE, the covariates are scaled to mean 0 and standard deviation 1 prior to kernel smoothing.
-For one covariate the default is scale = FALSE, and for 2 of more covariates the default is scale = TRUE.
-If including 2 or more covariates, scale should be set to \code{TRUE}.}
-
-\item{time}{Optional argument for specifying one timepoint at which predictions will be evaluated (e.g. \code{type = c("survival", "expected", "failure")}).}
 
 \item{quantile}{If \code{type = "quantile"}, specify the quantile to be estimates with a number between 0 and 1.}
 

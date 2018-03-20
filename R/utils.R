@@ -22,11 +22,12 @@ rankunidist = function(a) {
 #  HELPER FUNCTION (bandwidth lambda)  ---------------------------------------------------------------
 # function to calculate lambda based on bandwidth
 sjosmooth.bwidthlambda <- function(tbl, data, covars, bandwidth.k) {
-  dist = data[[covars]] - as.numeric(tbl[covars])
+  dist = as.vector(data[[covars]] - as.numeric(tbl[covars]))
+
   rank.dist = rankunidist(dist)
 
   # returning lambda
-  max(abs(dist[abs(rank.dist) <= bandwidth.k]))
+  max(abs(dist[abs(rank.dist) <= bandwidth.k]))*1.0001
 }  ###  THIS NEEDS TO BE CHECKED!
 
 
@@ -75,7 +76,7 @@ sjosmooth.model <- function(model.FUN, formula, data, K, verbose){
                       weights =  K[which(K > 0)  ]),
       error = function(e){
         #printing error and returning NA
-        message(paste("Error in", quote(model.FUN), "call"))
+        message(paste("Error in", substitute(model.FUN), "call"))
         if (verbose == TRUE) print(e)
         return(NA)
       }
