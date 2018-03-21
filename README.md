@@ -45,22 +45,22 @@ devtools::install_github("ddsjoberg/sjosmooth")
 
 We know that age is associated with survival after cancer diagnosis.
 Using data from patients with advanced lung cancer from the North
-Central Cancer Treatment Group, we’ll estimate one year survival rates
-by age at diagnosis.
+Central Cancer Treatment Group, we’ll estimate one year survival
+probability by age at diagnosis.
 
 ``` r
 # load survival and sjosmooth packages
 library(survival)
 library(sjosmooth)
 
-# save local copy of lung cancer data
+# save local copy of lung cancer data and order data
 cancer.df = lung[order(lung$age), ]
 
 # estimating survival 365 days after diagnosis
 cancer.df$yr1surv = sm.coxph(formula = Surv(time, status) ~ age, data = cancer.df, 
                              type = "survival", time = 365, bandwidth = 0.9)
 
-# plotting estimated 1 year survival by age
+# plotting estimated 1 year survival probability by age
 plot(cancer.df$age, cancer.df$yr1surv, type = "l")
 ```
 
