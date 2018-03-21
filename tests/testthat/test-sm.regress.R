@@ -10,7 +10,8 @@ test_that("Simple case runs without error, testing survival, failure, and expect
                ~ sm.regress(formula = Surv(time.true) ~ x,
                            data = sjosmooth.tbl,
                            newdata = newdata,
-                           type = .x)
+                           type = .x,
+                           model.FUN = coxph)
                )
     , NA
   )
@@ -24,7 +25,9 @@ test_that("Simple case runs without error, testing epanechnikov, tricube, and ga
       ~ sm.regress(formula = Surv(time.true) ~ x,
                   data = sjosmooth.tbl,
                   newdata = newdata,
-                  kernel = .x)
+                  kernel = .x,
+                  model.FUN = coxph,
+                  type = "survival")
     ),
     NA
   )
@@ -35,6 +38,8 @@ test_that("Simple case runs without error on scaled data", {
     sm.regress(formula = Surv(time.true) ~ x,
               data = sjosmooth.tbl,
               newdata = newdata,
+              model.FUN = coxph,
+              type = "survival",
               verbose = TRUE)
     , NA
   )
@@ -45,6 +50,8 @@ test_that("Simple case runs without error, with verbose output", {
     sm.regress(formula = Surv(time.true) ~ x,
               data = sjosmooth.tbl,
               newdata = newdata,
+              model.FUN = coxph,
+              type = "survival",
               verbose = TRUE)
     , NA
   )
@@ -57,7 +64,9 @@ test_that("Lambda cannot be negative", {
     sm.regress(formula = Surv(time.true) ~ x,
               data = sjosmooth.tbl,
               newdata = newdata,
-              lambda = -1)
+              lambda = -1,
+              model.FUN = coxph,
+              type = "survival")
   )
 })
 
@@ -65,7 +74,9 @@ test_that("input a variable not in dataset", {
   expect_error(
     sm.regress(formula = Surv(notime) ~ x,
               data = sjosmooth.tbl,
-              newdata = newdata.negtime)
+              newdata = newdata.negtime,
+              model.FUN = coxph,
+              type = "survival")
   )
 })
 
@@ -75,7 +86,9 @@ test_that("All dist.methods function properly", {
                ~ sm.regress(formula = Surv(time.true) ~ x,
                            data = sjosmooth.tbl,
                            newdata = newdata,
-                           dist.method = .x))
+                           dist.method = .x,
+                           model.FUN = coxph,
+                           type = "survival"))
     , NA
   )
 })

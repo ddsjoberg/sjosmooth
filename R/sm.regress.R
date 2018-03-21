@@ -10,7 +10,7 @@
 #' @param data A data.frame or tibble with named columns.
 #' @param newdata A data.frame or tibble with named columns.
 #' Predictions will only be estimated at these points, if specified.
-#' @param type Specifies the type of statistic that will be calculated.  Default is \code{survival}.
+#' @param type Specifies the type of statistic that will be calculated.  For example, from a Cox model, you may request \code{survival} or \code{expected}.
 #' @param model.FUN Specifies the type of model that will be used for the estimation  Default is \code{coxph}.
 #' @param bandwidth The proportion of data to be included in each kernel-smoothed estimate.  Univariate models only.
 #' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
@@ -21,23 +21,22 @@
 #' Any distance measure accepted by \code{stats::dist} is acceptable.
 #' @param quantile If \code{type = "quantile"}, specify the quantile to be estimates with a number between 0 and 1.
 #' @param verbose Default is \code{FALSE}.  If \code{TRUE}, additional results will be returned as attributes, and more detailed errors will be printed.
+#' @param ... Additional arguments to be passed to model.FUN function call.
 #' @return A vector with the estimated (i.e. kernel-smoothed) outcomes.
 #' @importFrom stats complete.cases
 #' @importFrom survival Surv
 #' @importFrom survival coxph
 #' @export
-sm.regress <- function(formula, data, newdata,
+sm.regress <- function(formula, data, newdata, type, model.FUN,
                        bandwidth = 0.8,
                        lambda = NULL,
-                       type = c("survival", "failure", "expected", "median", "quantile"),
                        kernel = c("epanechnikov", "tricube", "gaussian", "flat"),
                        dist.method = "euclidean",
-                       model.FUN = coxph,
-                       quantile = NULL,
-                       verbose = FALSE){
+                       quantile = NULL, # only used for survival regression to get survival quantiles
+                       verbose = FALSE,
+                       ...){
 
   # checking function inputs
-  type <-        match.arg(type)
   kernel <-      match.arg(kernel)
   if (!is.null(lambda)) {
     if (lambda <= 0) stop("lambda must be positive")
