@@ -1,5 +1,9 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- 
+index.md is hand copied from README.md.  The only difference is the relative location of the figures
+vignettes/x.png -> articles/x.png
+man/figures/x.png -> reference/figures/x.png
+-->
 
 # sjosmooth <img src="reference/figures/logo-small.png" align="right" />
 [![Build
@@ -57,4 +61,4 @@ cancer.df$yr1surv = sm.coxph(formula = Surv(time, status) ~ age, data = cancer.d
 plot(cancer.df$age, cancer.df$yr1surv, type = "l", ylim = c(0, 1))
 ```
 
-<img src="man/figures/README-example-1.png" width="50%" />
+<img src="reference/figures/README-example-1.png" width="50%" />
