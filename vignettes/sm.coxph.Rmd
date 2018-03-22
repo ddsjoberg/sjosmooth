@@ -21,7 +21,6 @@ require(ggplot2)
 ## Introduction `sm.coxph()`
 The `sjosmooth` package (pronounced sō smüt͟h) was built primarily to perform kernel smoothing on censored time-to-event or survival data.  The package provides kernel smoothed estimates of survival probabilities at specified times.  The `sm` package is closely related to the `sjosmooth` package in that it also performs kernel smoothing with censored time-to-event data; however, the `sm` package only allows for univariate estimation of a survival quantile (i.e. median survival time) using the Gaussain kernel (`sm::sm.survival()`).  `sjosmooth` allows for the use of other kernels and for one or more independent variables.  Here, we present a tutorial on the use of `sm.coxph`, which performs kernel smoothing from Cox proportional hazards regression models (`survival::coxph()`).
 
-## Using `sm.coxph()`
 Before we get any further into the use of the `sjosmooth` package and the `sm.coxph` function, load a few useful packages into memory.
 ```{r packages}
 library(tidyverse)
@@ -31,7 +30,8 @@ library(sjosmooth)
 library(survival)
 ```
 
-#### Example 1: Estimating 1-year survival--simple linear model
+## Example 1
+#### Estimating 1-year survival--simple linear model
 Let's begin with a basic scenario where the true realtionship between the hazard, $h(t; x)$, and a single covariate $x$ has a linear relationship in the Cox model with slope coeffiicient equal to 1 and baseline hazard 1 (i.e. $\beta = 1$ and $h_0(t) = 1$).
 $$
 h(t) = h_0(t)e^{\beta x} = e^x
@@ -94,7 +94,8 @@ ggplot() +
 
 
 
-#### Example 2: Estimating survival functions with non-linear features 
+## Example 2
+#### Estimating survival functions with non-linear features 
 The previous example could have easily been estitamed without kernel smoothing becuase of the linear relationship.  But when the relationship between the covariates and survival is non-linear or unknown kernel smoothing is particulalry useful.
 
 $$
@@ -138,7 +139,8 @@ ggplot() +
 ```
 
 
-#### Example 3: Choosing lambda, $\lambda$
+## Example 3
+#### Choosing lambda, $\lambda$
 Let's repeat the previous example, but show the results using varying choices of the \lambda parameter. Let's continue using the Epanechnikov kernel, and illustate how the results change with varying choices of \lambda.  Recall, \lambda is the radius of the kernel on the standardized scale, meaning that observations whose distance is less than \lambda units from the estimation point, $x_0$ (after standardizaton), will be included in the survival estimation.  For example, if $\lambda = 1$, observations within one standard deviation would be included.  Observations closest to $x_0$ will be the most heavily wieghted, while points further from $x_0$ but still closer than \lambda units away will have less weight.
 
 $$
@@ -182,7 +184,8 @@ ggplot() +
 When \lambda is small (e.g. $\lambda = 0.05$), fewer observations are utlized at each estimation point resulting in a jumpy and jagged estimation line.  Conversely, when \lambda is large ($\lambda = 10$), the curve is over smoothed and we lose the curvature of the true survival probability curve.  Investigate multiple \lambda values anytime you perform kernel smoothing, and select the best for your data.
 
 
-#### Example 4: Two or more independent variables
+## Example 4
+#### Two or more independent variables
 We will assume a non-linear relationship between two predictors, $x$ and $y$, and the hazard.
 $$
 h(t) = e^{2(x - \frac{1}{2})^2 + 2(y - \frac{1}{2})^2} 
