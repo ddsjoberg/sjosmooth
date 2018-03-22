@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# sjosmooth <img src="man/figures/logo-small.png" align="right" />
+# sjosmooth <img src="reference/figures/logo-small.png" align="right" />
 
 <!-- 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/sjosmooth)](https://cran.r-project.org/package=sjosmooth)
@@ -61,7 +61,7 @@ cancer.df$yr1surv = sm.coxph(formula = Surv(time, status) ~ age, data = cancer.d
                              type = "survival", time = 365, bandwidth = 0.9)
 
 # plotting estimated 1 year survival probability by age
-plot(cancer.df$age, cancer.df$yr1surv, type = "l")
+plot(cancer.df$age, cancer.df$yr1surv, type = "l", ylim = c(0, 1))
 ```
 
 <img src="man/figures/README-example-1.png" width="50%" />

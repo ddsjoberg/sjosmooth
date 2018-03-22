@@ -1,5 +1,5 @@
 ---
-title: "sjosmooth: Theory and Methods"
+title: "Theory and Methods"
 author: "Daniel D. Sjoberg"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

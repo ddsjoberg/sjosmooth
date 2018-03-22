@@ -2,7 +2,7 @@ Type: Package
 Package: sjosmooth
 Title: n-dimensional kernel smoothing for Cox proportional hazards regression models
 Version: 0.1.0
-Authors@R: person("Sjoberg", "Daniel D.", email = "danieldsjoberg@gmail.com", role = c("aut", "cre"))
+Authors@R: person("Daniel D.", "Sjoberg", email = "danieldsjoberg@gmail.com", role = c("aut", "cre"))
 Description: The sjosmooth was developed to calculate kernel-smoothed survival probability estimates from the Cox regression model (survival::coxph). The package's primary function is called smtime, which provides n-dimensional kernel-smoothed survival probability estimates.
 License: MIT + file LICENSE
 Depends:
