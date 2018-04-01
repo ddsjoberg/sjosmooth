@@ -68,8 +68,11 @@ sm.regress <- function(formula, data, newdata, type, model.FUN,
 
   # scaling newdata to mean 0 and sd 1
   newdata <- newdata[all.vars]
-  newdata[covars] <-
-    (newdata[covars] - attributes(data.scaled)$`scaled:center`) / attributes(data.scaled)$`scaled:scale`
+  newdata[covars] <- dplyr::bind_cols(
+    sapply(1:length(covars),
+           function(a) (newdata[covars][, a] - attr(data.scaled, "scaled:center")[a]) /
+             attr(data.scaled, "scaled:scale")[a])
+  )
 
   # getting unique observations to save computation time (and complete cases)
   newdata.uniq <- unique(newdata[stats::complete.cases(newdata), ])
