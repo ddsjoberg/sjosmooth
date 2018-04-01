@@ -67,8 +67,13 @@ sjosmooth.kernel <-
 
 #  HELPER FUNCTION (build model)  ---------------------------------------------------------------
 # this function builds the model
-sjosmooth.model <- function(model.FUN, formula, data, K, verbose){
+sjosmooth.model <- function(model.FUN, formula, data, K, verbose, tbl){
 
+    # if user requests point with no observations within the kernel radius, return a NULL model object
+    if (sum(K) == 0) {
+      message("Kernel weights sum to 0. Kernel-weighted model cannot be estimated for 1 observation--NA introduced.")
+      return(NULL)
+    }
     # building regression models, returning NA if error
     model.obj <- tryCatch(
       model.FUN(formula = stats::as.formula(formula),
@@ -77,7 +82,10 @@ sjosmooth.model <- function(model.FUN, formula, data, K, verbose){
       error = function(e){
         #printing error and returning NA
         message(paste("Error in", substitute(model.FUN), "call"))
-        if (verbose == TRUE) print(e)
+        if (verbose == TRUE) {
+          print(tbl)
+          print(e)
+        }
         return(NA)
       }
     )
@@ -91,6 +99,10 @@ sjosmooth.model <- function(model.FUN, formula, data, K, verbose){
 sjosmooth.prediction <-
   function(type, model.obj, tbl, outcome, quantile, verbose){
 
+    # if NULL model object is entered, returning NA.
+    # This happens when a prediction point has all zero weights and the model cannot be estimated.
+    if (is.null(model.obj)) return(NA)
+
     # calculating "survival", "failure", "expected"
     if (type %in% c("survival", "failure", "expected")){
       # calculating expected
@@ -100,8 +112,11 @@ sjosmooth.prediction <-
                        type = "expected"),
         error = function(e){
           #printing error and returning NA
-          message("Error in predict : NAs introduced")
-          if (verbose == TRUE) print(e)
+          message("Error in predict : NA introduced")
+          if (verbose == TRUE) {
+            print(tbl)
+            print(e)
+          }
           return(NA)
         }
       )
@@ -120,7 +135,7 @@ sjosmooth.prediction <-
                         probs = quantile)$quantile,
         error = function(e){
           #printing error and returning NA
-          message("Error in survfit/quantile : NAs introduced")
+          message("Error in survfit/quantile : NA introduced")
           if (verbose == TRUE) print(e)
           return(NA)
         }

@@ -98,9 +98,9 @@ sm.regress <- function(formula, data, newdata, type, model.FUN,
   )
 
   # building models, returning NA if error
-  model.obj <- purrr::map(
-    K,
-    ~ sjosmooth.model(model.FUN, formula, data, K = .x, verbose)
+  model.obj <- purrr::map2(
+    K, tbl, #this function doesn't need tbl.  only used to print more info for verbose errors#
+    ~ sjosmooth.model(model.FUN, formula, data, K = .x, verbose, tbl = .y)
   )
 
   # calculating predictions on estimating point (tbl)
