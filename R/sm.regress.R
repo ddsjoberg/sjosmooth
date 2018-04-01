@@ -37,7 +37,7 @@ sm.regress <- function(formula, data, newdata, type, model.FUN,
                        ...){
 
   # checking function inputs
-  kernel <-      match.arg(kernel)
+  kernel <- match.arg(kernel)
   if (!is.null(lambda)) {
     if (lambda <= 0) stop("lambda must be positive")
   }
@@ -61,12 +61,12 @@ sm.regress <- function(formula, data, newdata, type, model.FUN,
   # only keeping variables in model and complete cases
   data <- data[stats::complete.cases(data), all.vars]
 
-  # Scaling covariates to mean 0 and SD 1 if requested
+  # Scaling covariates to mean 0 and SD 1
   data.scaled <- scale(data[covars])
   # adding the outcome variable (all analyses will be done on the scaled data)
   data[covars] <- data.scaled
 
-  #scaling newdata to mean 0 and sd 1
+  # scaling newdata to mean 0 and sd 1
   newdata <- newdata[all.vars]
   newdata[covars] <-
     (newdata[covars] - attributes(data.scaled)$`scaled:center`) / attributes(data.scaled)$`scaled:scale`
