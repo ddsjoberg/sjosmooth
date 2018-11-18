@@ -194,7 +194,7 @@ This model would be poorly estimated if additive linearity in $x$ and $y$ were a
 
 ```{r sim.2d}
 # generating predictor variables, x
-n = 121
+n = 100
 data.seq = seq(from = 0, to = 1, length.out = n)
 set.seed(564)
 sjosmooth.2d = complete(
@@ -212,8 +212,8 @@ sjosmooth.2d = mutate(sjosmooth.2d,
 
 # plotting true survival
 true.surv = sjosmooth.2d %>%
-  select(x, y, survt1) %>%
-  spread(y, survt1) %>%
+  select(x, y, xb) %>%
+  spread(y, xb) %>%
   select(-x) %>%
   plot_ly(z = ~ as.matrix(.), 
           x = data.seq,
@@ -226,7 +226,7 @@ true.surv
 Now, we estimate the survival surface using kernel smoothing. The code that performs the kernel estiamtion has been commented out as it takes some time compute.  Note that for higher dimensional kernel smoothing to be accurate, much more data is needed resulting in longer computation times. This illustrative example would be even more accurate with a large sample size and a properly tuned \lambda parameter.
 ```{r estimate.2d}
 # generating new data to perform estiamtion on
-newdata.seq = seq(0.05, 0.95, by = 0.15)
+newdata.seq = seq(0.05, 0.95, length.out = 10)
 newdata.2d = complete(
   tibble(x = newdata.seq,
          y = newdata.seq,
@@ -234,22 +234,22 @@ newdata.2d = complete(
   x, y, time
 )
 
-# # calculating estimated survival
-# newdata.2d$survival = sm.coxph(formula = Surv(time) ~ x + y,
-#                                data = sjosmooth.2d,
-#                                lambda = 1,
-#                                newdata = newdata.2d,
-#                                type = "survival")
-# 
-# # plotting the estimated survival
-# est.surv = newdata.2d %>%
-#   select(x, y, survival) %>%
-#   spread(y, survival) %>%
-#   select(-x) %>%
-#   plot_ly(z = ~ as.matrix(.),
-#           x = newdata.seq,
-#           y = newdata.seq) %>%
-#   add_surface(showscale=FALSE)  %>%
-#   layout(title = "Estimated Survival")
-# est.surv
+# calculating estimated survival
+newdata.2d$pred.lp = sm.coxph(formula = Surv(time) ~ x + y,
+                               data = sjosmooth.2d,
+                               lambda = 1.2,
+                               newdata = newdata.2d,
+                               type = "lp")
+
+# plotting the estimated survival
+est.surv = newdata.2d %>%
+  select(x, y, pred.lp) %>%
+  spread(y, pred.lp) %>%
+  select(-x) %>%
+  plot_ly(z = ~ as.matrix(.),
+          x = newdata.seq,
+          y = newdata.seq) %>%
+  add_surface(showscale=FALSE)  %>%
+  layout(title = "Estimated Survival")
+est.surv
 ```

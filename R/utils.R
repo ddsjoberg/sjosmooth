@@ -103,8 +103,23 @@ sjosmooth.prediction <-
     # This happens when a prediction point has all zero weights and the model cannot be estimated.
     if (is.null(model.obj)) return(NA)
 
-    # calculating "survival", "failure", "expected"
-    if (type %in% c("survival", "failure", "expected")){
+    if (!(type %in% c("survival", "failure", "expected", "median", "quantile"))){
+      # calculating expected
+      pred <- tryCatch(
+        stats::predict(object = model.obj,
+                       newdata = tbl,
+                       type = type),
+        error = function(e){
+          #printing error and returning NA
+          message("Error in predict : NA introduced")
+          if (verbose == TRUE) {
+            print(tbl)
+            print(e)
+          }
+          return(NA)
+        }
+      )
+    } else if (type %in% c("survival", "failure", "expected")){ # calculating "survival", "failure", "expected"
       # calculating expected
       pred <- tryCatch(
         stats::predict(object = model.obj,

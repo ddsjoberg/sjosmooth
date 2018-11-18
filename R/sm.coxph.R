@@ -59,7 +59,7 @@ sm.coxph <- function(formula, data,
 
   # newdata must contain the same covariates as data
   if (!setequal(intersect(covars, names(newdata)), covars))
-    stop("newdata must include all independent variables from regression model.")
+    stop("newdata must include all independent variable(s) from regression model.")
 
   # if newdata is missing censoring variable, then adding one in
   # the predict.coxph requires it, but it is not used in calculating predictions
