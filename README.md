@@ -5,6 +5,8 @@
 status](https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master)](https://travis-ci.org/ddsjoberg/sjosmooth)
 [![AppVeyor build
 status](https://ci.appveyor.com/api/projects/status/github/ddsjoberg/sjosmooth?branch=master&svg=true)](https://ci.appveyor.com/project/ddsjoberg/sjosmooth)
+[![Coverage
+status](https://codecov.io/gh/ddsjoberg/sjosmooth/branch/master/graph/badge.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master)
 
 # sjosmooth
 
