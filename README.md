@@ -3,7 +3,8 @@
 
 [![Travis build
 status](https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master)](https://travis-ci.org/ddsjoberg/sjosmooth)
-\# sjosmooth
+
+# sjosmooth
 
 The goal of sjosmooth is to …
 
