@@ -43,4 +43,3 @@ calculate_weights <- function(dist, lambda, kernel, interaction) {
   ##  PUT ERROR for not selecting appropriate kernel
   stop(paste("kernel =", kernel, "not an accepted input."))
 }
-

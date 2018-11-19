@@ -45,11 +45,11 @@ sm_beta_interaction <- function(data, method, formula, interaction, newdata = da
     dplyr::as_data_frame() %>%
     stats::na.omit()
 
-  #scaling third interaction term
+  # scaling third interaction term
   data_scaled <- scale(data)
-  scaled_mean = attr(data_scaled, "scaled:center")
-  scaled_sd = attr(data_scaled, "scaled:scale")
-  data_scaled = data_scaled %>% dplyr::as_data_frame()
+  scaled_mean <- attr(data_scaled, "scaled:center")
+  scaled_sd <- attr(data_scaled, "scaled:scale")
+  data_scaled <- data_scaled %>% dplyr::as_data_frame()
 
   # prepping new data, by scaling interaction term and keeping unique value
   results <-
@@ -60,43 +60,47 @@ sm_beta_interaction <- function(data, method, formula, interaction, newdata = da
         function(x) dplyr::as_data_frame(x) %>% purrr::set_names(interaction)
       )
     ) %>%
-    dplyr::mutate_(
-      # adding scaled points
-      point_scaled = ~purrr::map(
-        point,
-        ~ ((.x - scaled_mean[interaction]) / scaled_sd[interaction]) %>% dplyr::as_data_frame()
-      ),
-      # calculating distance vector between point and full data
-      distance = ~purrr::map(
-        point_scaled,
-        ~ calculate_dist(data = data_scaled[interaction], point = .x, dist_method = "euclidean")
-      ),
-      # calculating kernel weights
-      weight = ~purrr::map(
-        distance,
-        ~ calculate_weights(dist = .x, lambda = lambda, kernel = "epanechnikov",
-                            interaction = interaction)
-      ),
-      # building model
-      model_obj = ~purrr::map(
-        weight,
-        ~ do.call(method,
-                  c(method.args,
-                    list(
-                      data = data %>% dplyr::filter(.x > 0),
-                      formula = formula,
-                      weights = .x[.x > 0]
-                    )
-                  )
+      dplyr::mutate_(
+        # adding scaled points
+        point_scaled = ~purrr::map(
+          point,
+          ~((.x - scaled_mean[interaction]) / scaled_sd[interaction]) %>% dplyr::as_data_frame()
+        ),
+        # calculating distance vector between point and full data
+        distance = ~purrr::map(
+          point_scaled,
+          ~calculate_dist(data = data_scaled[interaction], point = .x, dist_method = "euclidean")
+        ),
+        # calculating kernel weights
+        weight = ~purrr::map(
+          distance,
+          ~calculate_weights(
+            dist = .x, lambda = lambda, kernel = "epanechnikov",
+            interaction = interaction
+          )
+        ),
+        # building model
+        model_obj = ~purrr::map(
+          weight,
+          ~do.call(
+            method,
+            c(
+              method.args,
+              list(
+                data = data %>% dplyr::filter(.x > 0),
+                formula = formula,
+                weights = .x[.x > 0]
+              )
+            )
+          )
+        ),
+        # tidying model
+        model_tidy = ~purrr::map(
+          model_obj,
+          ~broom::tidy(.x, conf.int = TRUE, exponentiate = exponentiate) %>%
+            dplyr::filter_(~term == covar)
         )
-      ),
-      # tidying model
-      model_tidy = ~ purrr::map(
-        model_obj,
-        ~ broom::tidy(.x, conf.int = TRUE, exponentiate = exponentiate) %>%
-          dplyr::filter_(~term == covar)
       )
-    )
 
   return(results)
 }
