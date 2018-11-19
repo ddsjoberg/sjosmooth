@@ -2,7 +2,7 @@
 % Please edit documentation in R/sm_cont_interaction.R
 \name{sm_beta_interaction}
 \alias{sm_beta_interaction}
-\title{Illustrate interactions by illustarting changes in beta coefficient(s) over
+\title{Illustrate interactions by illustrating changes in beta coefficient(s) over
 a continuous variable}
 \usage{
 sm_beta_interaction(data, method, formula, interaction, newdata = data,
@@ -26,7 +26,7 @@ modelling function defined by `method`}
 \item{lambda}{The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 The standard deviation for the Gaussian kernel}
 
-\item{exponentiate}{Default is `FALSE`.  Exponentitate beta coefficients}
+\item{exponentiate}{Default is `FALSE`.  Exponentiate beta coefficients}
 }
 \description{
 This function illustrates how the relationship between an independent
