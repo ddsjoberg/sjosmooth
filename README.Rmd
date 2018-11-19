@@ -19,14 +19,14 @@ knitr::opts_chunk$set(
 
 # sjosmooth
 
-The goal of sjosmooth is to ...
+The goal of sjosmooth is to provide kernel smoothed estimates for time to event data.
 
 ## Installation
 
-You can install the released version of sjosmooth from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of sjosmooth from GitHub with:
 
 ``` r
-install.packages("sjosmooth")
+remotes::install_github("ddsjoberg/sjosmooth")
 ```
 
 ## Example
@@ -34,21 +34,20 @@ install.packages("sjosmooth")
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
-## basic example code
+library(sjosmooth)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+sm_beta_interaction(
+ data = mtcars,
+ method = "lm",
+ formula = mpg ~ am ,
+ interaction = "hp"
+) %>% 
+  select(point, model_tidy) %>% 
+  unnest(point) %>% 
+  unnest(model_tidy) %>% 
+  ggplot(aes(x = hp, y = estimate)) + 
+  geom_line() + 
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.5)
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!

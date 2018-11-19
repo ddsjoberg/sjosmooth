@@ -10,15 +10,15 @@ status](https://codecov.io/gh/ddsjoberg/sjosmooth/branch/master/graph/badge.svg)
 
 # sjosmooth
 
-The goal of sjosmooth is to …
+The goal of sjosmooth is to provide kernel smoothed estimates for time
+to event data.
 
 ## Installation
 
-You can install the released version of sjosmooth from
-[CRAN](https://CRAN.R-project.org) with:
+You can install the released version of sjosmooth from GitHub with:
 
 ``` r
-install.packages("sjosmooth")
+remotes::install_github("ddsjoberg/sjosmooth")
 ```
 
 ## Example
@@ -26,29 +26,31 @@ install.packages("sjosmooth")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-## basic example code
+library(sjosmooth)
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+library(tidyr)
+library(ggplot2)
+sm_beta_interaction(
+ data = mtcars,
+ method = "lm",
+ formula = mpg ~ am ,
+ interaction = "hp"
+) %>% 
+  select(point, model_tidy) %>% 
+  unnest(point) %>% 
+  unnest(model_tidy) %>% 
+  ggplot(aes(x = hp, y = estimate)) + 
+  geom_line() + 
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.5)
+#> Warning in qt(a, object$df.residual): NaNs produced
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub\!
+<img src="man/figures/README-example-1.png" width="100%" />
