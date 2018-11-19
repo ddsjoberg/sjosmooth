@@ -1,5 +1,5 @@
-#' Illustrate interactions by illustrating changes in beta coefficient(s) over
-#' a continuous variable
+#' Illustrate interactions by estimating changes in beta coefficient(s) over
+#' a continuous variable.
 #'
 #' This function illustrates how the relationship between an independent
 #' variable and a dependent variable is modified over the values of a third

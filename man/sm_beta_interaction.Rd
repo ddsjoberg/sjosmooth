@@ -2,8 +2,8 @@
 % Please edit documentation in R/sm_cont_interaction.R
 \name{sm_beta_interaction}
 \alias{sm_beta_interaction}
-\title{Illustrate interactions by illustrating changes in beta coefficient(s) over
-a continuous variable}
+\title{Illustrate interactions by estimating changes in beta coefficient(s) over
+a continuous variable.}
 \usage{
 sm_beta_interaction(data, method, formula, interaction, newdata = data,
   method.args = NULL, lambda = 1, exponentiate = FALSE)
