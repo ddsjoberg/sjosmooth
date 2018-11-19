@@ -1,4 +1,4 @@
-#' Illustrate interactions by illustarting changes in beta coefficient(s) over
+#' Illustrate interactions by illustrating changes in beta coefficient(s) over
 #' a continuous variable
 #'
 #' This function illustrates how the relationship between an independent
@@ -17,7 +17,7 @@
 #' modelling function defined by `method`
 #' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 #' The standard deviation for the Gaussian kernel
-#' @param exponentiate Default is `FALSE`.  Exponentitate beta coefficients
+#' @param exponentiate Default is `FALSE`.  Exponentiate beta coefficients
 #' @export
 #' @examples
 #' sm_beta_interaction(

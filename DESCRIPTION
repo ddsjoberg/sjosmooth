@@ -13,4 +13,6 @@ Imports:
     broom,
     purrr
 Suggests: 
-    covr
+    covr,
+    spelling
+Language: en-US
