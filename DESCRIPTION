@@ -8,6 +8,9 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0
 Imports: 
-    dplyr
+    dplyr,
+    magrittr,
+    broom,
+    purrr
 Suggests: 
     covr
