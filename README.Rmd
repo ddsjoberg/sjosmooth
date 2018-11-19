@@ -33,21 +33,39 @@ remotes::install_github("ddsjoberg/sjosmooth")
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+```{r example, message=FALSE}
 library(sjosmooth)
+library(purrr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-sm_beta_interaction(
+
+sm_wt_regression(
  data = mtcars,
  method = "lm",
- formula = mpg ~ am ,
- interaction = "hp"
+ formula = mpg ~ am,
+ weighting_var = "hp",
+ lambda = 2
 ) %>% 
+  mutate(
+     # tidying model
+        model_tidy = map(
+          model_obj,
+          ~broom::tidy(.x, conf.int = TRUE) %>%
+            dplyr::filter_(~term == "am")
+        )
+  ) %>%
   select(point, model_tidy) %>% 
   unnest(point) %>% 
   unnest(model_tidy) %>% 
   ggplot(aes(x = hp, y = estimate)) + 
   geom_line() + 
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.5)
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.4) +
+  geom_hline(
+    yintercept = lm(mpg ~ am, mtcars) %>% coef() %>% purrr::pluck(2),
+    linetype = "dashed"
+    ) +
+  labs(
+    y = "Slope Coefficient for 'am' regressed on 'mpg'"
+  )
 ```

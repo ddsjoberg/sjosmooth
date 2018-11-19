@@ -8,7 +8,7 @@
 #' @keywords internal
 #' @export
 
-calculate_weights <- function(dist, lambda, kernel, interaction) {
+calculate_weights <- function(dist, lambda, kernel, weighting_var) {
 
   # calculating weights
   if (kernel == "epanechnikov") {
@@ -31,7 +31,7 @@ calculate_weights <- function(dist, lambda, kernel, interaction) {
   }
   if (kernel == "gaussian") {
     return(
-      sqrt(2 * pi * lambda^2)^-length(interaction) * exp(-0.5 / lambda^2 * dist^2)
+      sqrt(2 * pi * lambda^2)^-length(weighting_var) * exp(-0.5 / lambda^2 * dist^2)
     )
   }
   if (kernel == "flat") {

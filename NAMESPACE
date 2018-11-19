@@ -2,5 +2,5 @@
 
 export("%>%")
 export(calculate_weights)
-export(sm_beta_interaction)
+export(sm_wt_regression)
 importFrom(magrittr,"%>%")

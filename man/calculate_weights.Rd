@@ -5,7 +5,7 @@
 \title{Provided a point, a data frame, and lambda, this function calculates the
 weights each observation in the data frame provides the calculations}
 \usage{
-calculate_weights(dist, lambda, kernel, interaction)
+calculate_weights(dist, lambda, kernel, weighting_var)
 }
 \arguments{
 \item{dist}{distance vector}
