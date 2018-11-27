@@ -15,15 +15,20 @@ sm_predict <- function(method, object, newdata, type) {
     {exp(-.)} %>%
       return()
   }
-  else {
-    stats::predict(object = object, newdata = newdata, type = type) %>%
-      return()
-  }
+
+  # otherwise, perform simple predict(), and return the output
+  stats::predict(object = object, newdata = newdata, type = type) %>%
+    return()
 }
 
 #' @keywords internal
 #' @rdname sm_predict
 # safe version
+# returns a list with two elements list(result, error).  THe first is the result, and the
+# second the error message (if there is one). The first result is a list of the
+# results list(result, warnings, messages)
+# final output looks like this
+# list(result = list(result, warnings, messages), error)
 sm_predict_safely <-
   sm_predict %>%
   purrr::quietly() %>%
