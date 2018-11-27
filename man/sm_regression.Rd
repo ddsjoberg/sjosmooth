@@ -5,7 +5,7 @@
 \title{Kernel-weighted regression estimation}
 \usage{
 sm_regression(data, method, formula, type, newdata = data,
-  method.args = NULL, lambda = 1)
+  method.args = NULL, lambda = 1, verbose = FALSE)
 }
 \arguments{
 \item{data}{data frame}
@@ -24,6 +24,8 @@ modelling function defined by `method`}
 
 \item{lambda}{The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 The standard deviation for the Gaussian kernel}
+
+\item{verbose}{Return full set of results. Default is `FALSE`}
 }
 \description{
 Provides smoothed estimates from a variety of models, but was built to work

@@ -8,7 +8,7 @@
 
 sm_predict <- function(method, object, newdata, type) {
   # if model object is NULL, return NULL
-  if (is.null(object)) return(NULL)
+  if (is.null(object)) return(NA_real_)
 
   if (method == "coxph" & type == "survival") {
     predict(object = object, newdata = newdata, type = "expected") %>%
@@ -21,6 +21,8 @@ sm_predict <- function(method, object, newdata, type) {
   }
 }
 
+#' @keywords internal
+#' @rdname sm_predict
 # safe version
 sm_predict_safely <-
   sm_predict %>%
