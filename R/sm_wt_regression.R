@@ -6,11 +6,10 @@
 #' estimated; the estimates are weighted by the variable(s) listed in `weighting_var`.
 #'
 #' @param data data frame
-#' @param method (function) to use
+#' @param method function to use
 #' @param formula formula
 #' @param weighting_var columns name(s) of variables used to calculate weights
-#' @param newdata new data frame.  Default is `data`.  Only requires third
-#' term from `interaction`
+#' @param newdata new data frame.  Default is `data`.
 #' @param method.args List of additional arguments passed on to the
 #' modelling function defined by `method`
 #' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
@@ -26,15 +25,15 @@
 #' )
 
 sm_wt_regression <- function(data, method, formula, weighting_var, newdata = data,
-                                method.args = NULL, lambda = 1) {
+                             method.args = NULL, lambda = 1) {
 
   # all variables
-  all_vars <- c(all.vars(formula), weighting_var)
+  all_vars <- c(all.vars(formula), weighting_var) %>% unique()
   covar <- all.vars(formula)[[2]]
 
-  # converting to tibble
+  # converting to tibble, and only keeping required vars
   newdata <-
-    newdata[weighting_var] %>%
+    newdata[all_vars] %>%
     dplyr::as_data_frame()
 
   # saving subsets of the data
@@ -51,45 +50,50 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
 
   # prepping new data, by scaling interaction term and keeping unique value
   results <-
-    # putting points in data frame
+    # converting newdata into list where each row is a list element
     dplyr::data_frame(
-      point = apply(
-        newdata %>% dplyr::distinct(), 1,
-        function(x) dplyr::as_data_frame(x) %>% purrr::set_names(weighting_var)
+      newdata = apply(
+        newdata[all_vars] %>% dplyr::distinct(), 1,
+        function(x) t(x) %>% dplyr::as_data_frame() %>% purrr::set_names(all_vars)
       )
     ) %>%
-      dplyr::mutate_(
-        # adding scaled points
-        point_scaled = ~purrr::map(
-          point,
-          ~((.x - scaled_mean[weighting_var]) / scaled_sd[weighting_var]) %>% dplyr::as_data_frame()
-        ),
-        # calculating distance vector between point and full data
-        distance = ~purrr::map(
-          point_scaled,
-          ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = "euclidean")
-        ),
-        # calculating kernel weights
-        weight = ~purrr::map(
-          distance,
-          ~calculate_weights(
-            dist = .x, lambda = lambda, kernel = "epanechnikov",
-            weighting_var = weighting_var
-          )
-        ),
-        # building model
-        model_obj = ~purrr::map(
-          weight,
-          ~do.call(
-            method,
-            c(method.args,
-              list(data = data %>% dplyr::filter(.x > 0),
-                   formula = formula,
-                   weights = .x[.x > 0])
-            )
+    dplyr::mutate_(
+      # adding scaled points
+      newdata_scaled = ~purrr::map(
+        newdata,
+        ~((.x[weighting_var] - scaled_mean[weighting_var]) / scaled_sd[weighting_var]) %>% dplyr::as_data_frame()
+      ),
+      # calculating distance vector between point and full data
+      distance = ~purrr::map(
+        newdata_scaled,
+        ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = "euclidean")
+      ),
+      # calculating kernel weights
+      weight = ~purrr::map(
+        distance,
+        ~calculate_weights(
+          dist = .x, lambda = lambda, kernel = "epanechnikov",
+          weighting_var = weighting_var
+        )
+      ),
+      # building model, safely
+      model_safely = ~purrr::map(
+        weight,
+        ~do.call_safely(
+          what = method,
+          args = c(method.args,
+                   list(data = data %>% dplyr::filter(.x > 0),
+                        formula = formula,
+                        weights = .x[.x > 0])
           )
         )
-      )
+      ),
+      # extracting objects, warnings, errors from safely object
+      model_error = ~purrr::map(model_safely, ~ .x[["error"]]),
+      model_warning = ~purrr::map(model_safely, ~ .x[["result"]][["warnings"]]),
+      model_message = ~purrr::map(model_safely, ~ .x[["result"]][["messages"]]),
+      model_obj = ~purrr::map(model_safely, ~ .x[["result"]][["result"]])
+    )
 
   return(results)
 }
