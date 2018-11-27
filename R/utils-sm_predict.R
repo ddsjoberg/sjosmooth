@@ -11,12 +11,12 @@ sm_predict <- function(method, object, newdata, type) {
   if (is.null(object)) return(NA_real_)
 
   if (method == "coxph" & type == "survival") {
-    predict(object = object, newdata = newdata, type = "expected") %>%
+    stats::predict(object = object, newdata = newdata, type = "expected") %>%
     {exp(-.)} %>%
       return()
   }
   else {
-    predict(object = object, newdata = newdata, type = type) %>%
+    stats::predict(object = object, newdata = newdata, type = type) %>%
       return()
   }
 }

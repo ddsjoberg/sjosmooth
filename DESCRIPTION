@@ -11,7 +11,8 @@ Imports:
     dplyr,
     magrittr,
     broom,
-    purrr
+    purrr,
+    tidyr
 Suggests: 
     covr,
     spelling
