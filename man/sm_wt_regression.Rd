@@ -5,7 +5,8 @@
 \title{Kernel-weighted regression modelling}
 \usage{
 sm_wt_regression(data, method, formula, weighting_var, newdata = data,
-  method.args = NULL, lambda = 1)
+  method.args = NULL, lambda = 1, kernel = "epanechnikov",
+  dist.method = "euclidean")
 }
 \arguments{
 \item{data}{data frame}
@@ -23,6 +24,13 @@ modelling function defined by `method`}
 
 \item{lambda}{The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 The standard deviation for the Gaussian kernel}
+
+\item{kernel}{Specifies the kernel to be used: `epanechnikov`, `tricube`,
+`gaussian`, and `flat` are accepted. Default is `epanechnikov`}
+
+\item{dist.method}{Specifies the distance measure to be used in the kernel.
+Default is `euclidean`. Distance measures accepted by
+\code{stats::\link[stats]{dist}} is acceptable.}
 }
 \description{
 General function that fits weighted regerssion models, where the weights

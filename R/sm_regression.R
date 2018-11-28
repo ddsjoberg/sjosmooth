@@ -17,7 +17,8 @@
 #' @export
 
 sm_regression <- function(data, method, formula, type, newdata = data,
-                          method.args = NULL, lambda = 1, verbose = FALSE) {
+                          method.args = NULL, lambda = 1,
+                          verbose = FALSE) {
 
   # WEIGHTED REGRESSION MODELS -------------------------------------------------
   wt_models <-
@@ -33,7 +34,8 @@ sm_regression <- function(data, method, formula, type, newdata = data,
     dplyr::mutate_(
       predict_safely = ~purrr::map2(
         model_obj, newdata,
-        ~ sm_predict_safely(method = method, object = .x, newdata = .y, type = type)
+        ~ sm_predict_safely(method = method, object = .x, newdata = .y,
+                            type = type)
       )
       ,
       # extracting objects, warnings, errors from safely object
@@ -41,30 +43,30 @@ sm_regression <- function(data, method, formula, type, newdata = data,
       predict_warning = ~purrr::map(predict_safely, ~ .x[["result"]][["warnings"]]),
       predict_message = ~purrr::map(predict_safely, ~ .x[["result"]][["messages"]]),
       # extracting result and storing in vector
-      ...prediction... = ~purrr::map_dbl(predict_safely, ~ .x[["result"]][["result"]] %||% NA_real_)
+      predict_result = ~purrr::map(predict_safely, ~ .x[["result"]][["result"]])
     )
-
+  wt_models
   # RETURN ---------------------------------------------------------------------
   # getting names of variables in newname for merging
-  names_newdata <- names(wt_models$newdata[1][[1]])
-
-  # calculations were only performed for unique newdata observations
-  # merging result with full newdata object and returning vector of results
-  sm_prediction <-
-    newdata %>%
-    dplyr::left_join(
-      wt_models %>%
-        dplyr::select(c("newdata", "...prediction...")) %>%
-        tidyr::unnest(newdata),
-      by = names_newdata
-    ) %>%
-    dplyr::pull("...prediction...")
-
-  # adding attributes
-  attr(sm_prediction, "type") <- type
-  if (verbose == TRUE) {
-    attr(sm_prediction, "wt_models") <- wt_models
-  }
-
-  sm_prediction
+  # names_newdata <- names(wt_models$newdata[1][[1]])
+  #
+  # # calculations were only performed for unique newdata observations
+  # # merging result with full newdata object and returning vector of results
+  # sm_prediction <-
+  #   newdata %>%
+  #   dplyr::left_join(
+  #     wt_models %>%
+  #       dplyr::select(c("newdata", "...prediction...")) %>%
+  #       tidyr::unnest(newdata),
+  #     by = names_newdata
+  #   ) %>%
+  #   dplyr::pull("...prediction...")
+  #
+  # # adding attributes
+  # attr(sm_prediction, "type") <- type
+  # if (verbose == TRUE) {
+  #   attr(sm_prediction, "wt_models") <- wt_models
+  # }
+  #
+  # sm_prediction
 }
