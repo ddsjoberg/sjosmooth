@@ -106,10 +106,18 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
   return(results)
 }
 
-# t =
-# sm_beta_interaction(
+# sm_wt_regression(
+#   data = lung,
+#   method = "coxph",
+#   formula = Surv(time, status) ~ age,
+#   weighting_var = "wt.loss",
+#   lambda = 0.5
+# )
+#
+# sm_wt_regression(
 #   data = mtcars,
 #   method = "lm",
 #   formula = mpg ~ am ,
-#   interaction = "hp"
+#   weighting_var = "am",
+#   lambda = 1
 # )
