@@ -38,9 +38,11 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
   covar <- all.vars(formula)[[2]]
 
   # converting to tibble, and only keeping required vars
+  newdata_keepvars = intersect(all_vars, names(newdata))
   newdata <-
-    newdata[all_vars] %>%
-    dplyr::as_data_frame()
+    newdata[newdata_keepvars] %>%
+    dplyr::as_data_frame() %>%
+    stats::na.omit()
 
   # saving subsets of the data
   data <-
@@ -54,22 +56,22 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
   scaled_sd <- attr(data_scaled, "scaled:scale")
   data_scaled <- data_scaled %>% dplyr::as_data_frame()
 
-  # prepping new data, by scaling interaction term and keeping unique value
+  # Creating tibble of results (starting with prepping new data, then building models)
   results <-
     # converting newdata into list where each row is a list element
     dplyr::data_frame(
       newdata = apply(
-        newdata[all_vars] %>% dplyr::distinct(), 1,
-        function(x) t(x) %>% dplyr::as_data_frame() %>% purrr::set_names(all_vars)
+        newdata %>% dplyr::distinct(), 1,
+        function(x) t(x) %>% dplyr::as_data_frame() %>% purrr::set_names(newdata_keepvars)
       )
     ) %>%
     dplyr::mutate_(
-      # adding scaled points
+      # adding scaled newdata points
       newdata_scaled = ~purrr::map(
         newdata,
         ~((.x[weighting_var] - scaled_mean[weighting_var]) / scaled_sd[weighting_var]) %>% dplyr::as_data_frame()
       ),
-      # calculating distance vector between point and full data
+      # calculating distance vector between point and full data (weighting variables only)
       distance = ~purrr::map(
         newdata_scaled,
         ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = dist.method)
@@ -94,7 +96,7 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
           )
         )
       ),
-      # extracting objects, warnings, errors from safely object
+      # extracting objects, warnings, errors from model_safely object
       model_error = ~purrr::map(model_safely, ~ .x[["error"]]),
       model_warning = ~purrr::map(model_safely, ~ .x[["result"]][["warnings"]]),
       model_message = ~purrr::map(model_safely, ~ .x[["result"]][["messages"]]),
