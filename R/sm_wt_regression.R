@@ -14,6 +14,11 @@
 #' modelling function defined by `method`
 #' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 #' The standard deviation for the Gaussian kernel
+#' @param kernel Specifies the kernel to be used: `epanechnikov`, `tricube`,
+#' `gaussian`, and `flat` are accepted. Default is `epanechnikov`
+#' @param dist.method Specifies the distance measure to be used in the kernel.
+#' Default is `euclidean`. Distance measures accepted by
+#' \code{stats::\link[stats]{dist}} is acceptable.
 #' @export
 #' @examples
 #' sm_wt_regression(
@@ -25,16 +30,19 @@
 #' )
 
 sm_wt_regression <- function(data, method, formula, weighting_var, newdata = data,
-                             method.args = NULL, lambda = 1) {
+                             method.args = NULL, lambda = 1, kernel = "epanechnikov",
+                             dist.method = "euclidean") {
 
   # all variables
   all_vars <- c(all.vars(formula), weighting_var) %>% unique()
   covar <- all.vars(formula)[[2]]
 
   # converting to tibble, and only keeping required vars
+  newdata_keepvars = intersect(all_vars, names(newdata))
   newdata <-
-    newdata[all_vars] %>%
-    dplyr::as_data_frame()
+    newdata[newdata_keepvars] %>%
+    dplyr::as_data_frame() %>%
+    stats::na.omit()
 
   # saving subsets of the data
   data <-
@@ -48,31 +56,31 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
   scaled_sd <- attr(data_scaled, "scaled:scale")
   data_scaled <- data_scaled %>% dplyr::as_data_frame()
 
-  # prepping new data, by scaling interaction term and keeping unique value
+  # Creating tibble of results (starting with prepping new data, then building models)
   results <-
     # converting newdata into list where each row is a list element
     dplyr::data_frame(
       newdata = apply(
-        newdata[all_vars] %>% dplyr::distinct(), 1,
-        function(x) t(x) %>% dplyr::as_data_frame() %>% purrr::set_names(all_vars)
+        newdata %>% dplyr::distinct(), 1,
+        function(x) t(x) %>% dplyr::as_data_frame() %>% purrr::set_names(newdata_keepvars)
       )
     ) %>%
     dplyr::mutate_(
-      # adding scaled points
+      # adding scaled newdata points
       newdata_scaled = ~purrr::map(
         newdata,
         ~((.x[weighting_var] - scaled_mean[weighting_var]) / scaled_sd[weighting_var]) %>% dplyr::as_data_frame()
       ),
-      # calculating distance vector between point and full data
+      # calculating distance vector between point and full data (weighting variables only)
       distance = ~purrr::map(
         newdata_scaled,
-        ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = "euclidean")
+        ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = dist.method)
       ),
       # calculating kernel weights
       weight = ~purrr::map(
         distance,
         ~calculate_weights(
-          dist = .x, lambda = lambda, kernel = "epanechnikov",
+          dist = .x, lambda = lambda, kernel = kernel,
           weighting_var = weighting_var
         )
       ),
@@ -88,7 +96,7 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
           )
         )
       ),
-      # extracting objects, warnings, errors from safely object
+      # extracting objects, warnings, errors from model_safely object
       model_error = ~purrr::map(model_safely, ~ .x[["error"]]),
       model_warning = ~purrr::map(model_safely, ~ .x[["result"]][["warnings"]]),
       model_message = ~purrr::map(model_safely, ~ .x[["result"]][["messages"]]),
