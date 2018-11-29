@@ -2,10 +2,11 @@
 % Please edit documentation in R/sm_regression.R
 \name{sm_regression}
 \alias{sm_regression}
-\title{Kernel-weighted regression estimation}
+\title{Kernel-weighted regression modelling}
 \usage{
-sm_regression(data, method, formula, type, newdata = data,
-  method.args = NULL, lambda = 1, verbose = FALSE)
+sm_regression(data, method, formula, weighting_var, newdata = data,
+  method.args = NULL, lambda = 1, kernel = "epanechnikov",
+  dist.method = "euclidean")
 }
 \arguments{
 \item{data}{data frame}
@@ -14,10 +15,9 @@ sm_regression(data, method, formula, type, newdata = data,
 
 \item{formula}{formula}
 
-\item{type}{type of statistic to smooth (e.g. survival, median survival, etc.)}
+\item{weighting_var}{columns name(s) of variables used to calculate weights}
 
-\item{newdata}{new data frame.  Default is `data`. Only requires covarites from
-the RHS of `~` and the time compenent from the outcome for some survival estimators.}
+\item{newdata}{new data frame.  Default is `data`.}
 
 \item{method.args}{List of additional arguments passed on to the
 modelling function defined by `method`}
@@ -25,9 +25,25 @@ modelling function defined by `method`}
 \item{lambda}{The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 The standard deviation for the Gaussian kernel}
 
-\item{verbose}{Return full set of results. Default is `FALSE`}
+\item{kernel}{Specifies the kernel to be used: `epanechnikov`, `tricube`,
+`gaussian`, and `flat` are accepted. Default is `epanechnikov`}
+
+\item{dist.method}{Specifies the distance measure to be used in the kernel.
+Default is `euclidean`. Distance measures accepted by
+\code{stats::\link[stats]{dist}} is acceptable.}
 }
 \description{
-Provides smoothed estimates from a variety of models, but was built to work
-primarily with time to event endpoints.
+General function that fits weighted regerssion models, where the weights
+are calculated from a ancillary variable(s) or from variable(s) found in the
+regression model. Using `data`, `method`, and `formula` the regression model is
+estimated; the estimates are weighted by the variable(s) listed in `weighting_var`.
+}
+\examples{
+sm_regression(
+  data = mtcars,
+  method = "lm",
+  formula = mpg ~ am ,
+  weighting_var = "hp",
+  lambda = 2
+)
 }

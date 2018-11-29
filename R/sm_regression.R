@@ -1,72 +1,123 @@
-#' Kernel-weighted regression estimation
+#' Kernel-weighted regression modelling
 #'
-#' Provides smoothed estimates from a variety of models, but was built to work
-#' primarily with time to event endpoints.
+#' General function that fits weighted regerssion models, where the weights
+#' are calculated from a ancillary variable(s) or from variable(s) found in the
+#' regression model. Using `data`, `method`, and `formula` the regression model is
+#' estimated; the estimates are weighted by the variable(s) listed in `weighting_var`.
 #'
 #' @param data data frame
 #' @param method function to use
 #' @param formula formula
-#' @param type type of statistic to smooth (e.g. survival, median survival, etc.)
-#' @param newdata new data frame.  Default is `data`. Only requires covarites from
-#' the RHS of `~` and the time compenent from the outcome for some survival estimators.
+#' @param weighting_var columns name(s) of variables used to calculate weights
+#' @param newdata new data frame.  Default is `data`.
 #' @param method.args List of additional arguments passed on to the
 #' modelling function defined by `method`
 #' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 #' The standard deviation for the Gaussian kernel
-#' @param verbose Return full set of results. Default is `FALSE`
+#' @param kernel Specifies the kernel to be used: `epanechnikov`, `tricube`,
+#' `gaussian`, and `flat` are accepted. Default is `epanechnikov`
+#' @param dist.method Specifies the distance measure to be used in the kernel.
+#' Default is `euclidean`. Distance measures accepted by
+#' \code{stats::\link[stats]{dist}} is acceptable.
 #' @export
+#' @examples
+#' sm_regression(
+#'   data = mtcars,
+#'   method = "lm",
+#'   formula = mpg ~ am ,
+#'   weighting_var = "hp",
+#'   lambda = 2
+#' )
 
-sm_regression <- function(data, method, formula, type, newdata = data,
-                          method.args = NULL, lambda = 1,
-                          verbose = FALSE) {
+sm_regression <- function(data, method, formula, weighting_var, newdata = data,
+                             method.args = NULL, lambda = 1, kernel = "epanechnikov",
+                             dist.method = "euclidean") {
 
-  # WEIGHTED REGRESSION MODELS -------------------------------------------------
-  wt_models <-
-    sm_wt_regression(
-      data = data, method = method, formula = formula,
-      weighting_var = all.vars(formula)[[2]], newdata = newdata,
-      method.args = method.args, lambda = lambda
-    )
+  # all variables
+  all_vars <- c(all.vars(formula), weighting_var) %>% unique()
+  covar <- all.vars(formula)[[2]]
 
-  # PREDICTIONS ----------------------------------------------------------------
-  wt_models <-
-    wt_models %>%
-    dplyr::mutate_(
-      predict_safely = ~purrr::map2(
-        model_obj, newdata,
-        ~ sm_predict_safely(method = method, object = .x, newdata = .y,
-                            type = type)
+  # converting to tibble, and only keeping required vars
+  newdata_keepvars = intersect(all_vars, names(newdata))
+  newdata <-
+    newdata[newdata_keepvars] %>%
+    dplyr::as_data_frame() %>%
+    stats::na.omit()
+
+  # saving subsets of the data
+  data <-
+    data[all_vars] %>%
+    dplyr::as_data_frame() %>%
+    stats::na.omit()
+
+  # scaling third interaction term
+  data_scaled <- scale(data)
+  scaled_mean <- attr(data_scaled, "scaled:center")
+  scaled_sd <- attr(data_scaled, "scaled:scale")
+  data_scaled <- data_scaled %>% dplyr::as_data_frame()
+
+  # Creating tibble of results (starting with prepping new data, then building models)
+  results <-
+    # converting newdata into list where each row is a list element
+    dplyr::data_frame(
+      newdata = apply(
+        newdata %>% dplyr::distinct(), 1,
+        function(x) t(x) %>% dplyr::as_data_frame() %>% purrr::set_names(newdata_keepvars)
       )
-      ,
-      # extracting objects, warnings, errors from safely object
-      predict_error = ~purrr::map(predict_safely, ~ .x[["error"]]),
-      predict_warning = ~purrr::map(predict_safely, ~ .x[["result"]][["warnings"]]),
-      predict_message = ~purrr::map(predict_safely, ~ .x[["result"]][["messages"]]),
-      # extracting result and storing in vector
-      predict_result = ~purrr::map(predict_safely, ~ .x[["result"]][["result"]])
+    ) %>%
+    dplyr::mutate_(
+      # adding scaled newdata points
+      newdata_scaled = ~purrr::map(
+        newdata,
+        ~((.x[weighting_var] - scaled_mean[weighting_var]) / scaled_sd[weighting_var]) %>% dplyr::as_data_frame()
+      ),
+      # calculating distance vector between point and full data (weighting variables only)
+      distance = ~purrr::map(
+        newdata_scaled,
+        ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = dist.method)
+      ),
+      # calculating kernel weights
+      weight = ~purrr::map(
+        distance,
+        ~calculate_weights(
+          dist = .x, lambda = lambda, kernel = kernel,
+          weighting_var = weighting_var
+        )
+      ),
+      # building model, safely
+      model_safely = ~purrr::map(
+        weight,
+        ~do.call_safely(
+          what = method,
+          args = c(method.args,
+                   list(data = data %>% dplyr::filter(.x > 0),
+                        formula = formula,
+                        weights = .x[.x > 0])
+          )
+        )
+      ),
+      # extracting objects, warnings, errors from model_safely object
+      model_error = ~purrr::map(model_safely, ~ .x[["error"]]),
+      model_warning = ~purrr::map(model_safely, ~ .x[["result"]][["warnings"]]),
+      model_message = ~purrr::map(model_safely, ~ .x[["result"]][["messages"]]),
+      model_obj = ~purrr::map(model_safely, ~ .x[["result"]][["result"]])
     )
-  wt_models
-  # RETURN ---------------------------------------------------------------------
-  # getting names of variables in newname for merging
-  # names_newdata <- names(wt_models$newdata[1][[1]])
-  #
-  # # calculations were only performed for unique newdata observations
-  # # merging result with full newdata object and returning vector of results
-  # sm_prediction <-
-  #   newdata %>%
-  #   dplyr::left_join(
-  #     wt_models %>%
-  #       dplyr::select(c("newdata", "...prediction...")) %>%
-  #       tidyr::unnest(newdata),
-  #     by = names_newdata
-  #   ) %>%
-  #   dplyr::pull("...prediction...")
-  #
-  # # adding attributes
-  # attr(sm_prediction, "type") <- type
-  # if (verbose == TRUE) {
-  #   attr(sm_prediction, "wt_models") <- wt_models
-  # }
-  #
-  # sm_prediction
+
+  return(results)
 }
+
+# sm_regression(
+#   data = lung,
+#   method = "coxph",
+#   formula = Surv(time, status) ~ age,
+#   weighting_var = "wt.loss",
+#   lambda = 0.5
+# )
+#
+# sm_regression(
+#   data = mtcars,
+#   method = "lm",
+#   formula = mpg ~ am ,
+#   weighting_var = "am",
+#   lambda = 1
+# )
