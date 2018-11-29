@@ -40,7 +40,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-sm_wt_regression(
+sm_regression(
  data = mtcars,
  method = "lm",
  formula = mpg ~ am,
@@ -55,8 +55,8 @@ sm_wt_regression(
             dplyr::filter_(~term == "am")
         )
   ) %>%
-  select(point, model_tidy) %>% 
-  unnest(point) %>% 
+  select(newdata, model_tidy) %>% 
+  unnest(newdata) %>% 
   unnest(model_tidy) %>% 
   ggplot(aes(x = hp, y = estimate)) + 
   geom_line() + 
