@@ -73,7 +73,7 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
 }
 
 #' @keywords internal
-#' @rdname sm_predict
+#' @rdname sm_predict_raw
 # safe version
 # returns a list with two elements list(result, error).  THe first is the result, and the
 # second the error message (if there is one). The first result is a list of the

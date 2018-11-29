@@ -22,7 +22,7 @@ sm_predict <- function(data, method, formula, type, newdata = data,
 
   # WEIGHTED REGRESSION MODELS -------------------------------------------------
   wt_models <-
-    sm_wt_regression(
+    sm_regression(
       data = data, method = method, formula = formula,
       weighting_var = all.vars(formula)[[2]], newdata = newdata,
       method.args = method.args, lambda = lambda

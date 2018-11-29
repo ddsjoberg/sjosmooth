@@ -21,7 +21,7 @@
 #' \code{stats::\link[stats]{dist}} is acceptable.
 #' @export
 #' @examples
-#' sm_wt_regression(
+#' sm_regression(
 #'   data = mtcars,
 #'   method = "lm",
 #'   formula = mpg ~ am ,
@@ -29,7 +29,7 @@
 #'   lambda = 2
 #' )
 
-sm_wt_regression <- function(data, method, formula, weighting_var, newdata = data,
+sm_regression <- function(data, method, formula, weighting_var, newdata = data,
                              method.args = NULL, lambda = 1, kernel = "epanechnikov",
                              dist.method = "euclidean") {
 
@@ -106,7 +106,7 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
   return(results)
 }
 
-# sm_wt_regression(
+# sm_regression(
 #   data = lung,
 #   method = "coxph",
 #   formula = Surv(time, status) ~ age,
@@ -114,7 +114,7 @@ sm_wt_regression <- function(data, method, formula, weighting_var, newdata = dat
 #   lambda = 0.5
 # )
 #
-# sm_wt_regression(
+# sm_regression(
 #   data = mtcars,
 #   method = "lm",
 #   formula = mpg ~ am ,

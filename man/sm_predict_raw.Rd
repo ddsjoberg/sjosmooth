@@ -2,9 +2,12 @@
 % Please edit documentation in R/utils-sm_predict_raw.R
 \name{sm_predict_raw}
 \alias{sm_predict_raw}
+\alias{sm_predict_raw_safely}
 \title{Wrapper for `predict()` with custom coding for some types of predictions.}
 \usage{
 sm_predict_raw(method, object, newdata, type, conf.level = 0.95)
+
+sm_predict_raw_safely(...)
 }
 \arguments{
 \item{method}{type of regression model}
