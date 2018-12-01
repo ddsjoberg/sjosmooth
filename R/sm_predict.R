@@ -17,15 +17,15 @@
 #' @export
 
 sm_predict <- function(data, method, formula, type, newdata = data,
-                          method.args = NULL, lambda = 1,
-                          verbose = FALSE) {
+                       method.args = NULL, lambda = 1,
+                       verbose = FALSE) {
 
   # WEIGHTED REGRESSION MODELS -------------------------------------------------
   wt_models <-
     sm_regression(
       data = data, method = method, formula = formula,
-      weighting_var = all.vars(formula)[[2]], newdata = newdata,
-      method.args = method.args, lambda = lambda
+      weighting_var = all.vars(formula[-2]), # vars on RHS of ~
+      newdata = newdata, method.args = method.args, lambda = lambda
     )
 
   # PREDICTIONS ----------------------------------------------------------------
@@ -34,17 +34,17 @@ sm_predict <- function(data, method, formula, type, newdata = data,
     dplyr::mutate_(
       predict_safely = ~purrr::map2(
         model_obj, newdata,
-        ~ sm_predict_raw_safely(
+        ~sm_predict_raw_safely(
           method = method, object = .x, newdata = .y,
           type = type, conf.level = 0.95
         )
       ),
       # extracting objects, warnings, errors from safely object
-      predict_error = ~purrr::map(predict_safely, ~ .x[["error"]]),
-      predict_warning = ~purrr::map(predict_safely, ~ .x[["result"]][["warnings"]]),
-      predict_message = ~purrr::map(predict_safely, ~ .x[["result"]][["messages"]]),
+      predict_error = ~purrr::map(predict_safely, ~.x[["error"]]),
+      predict_warning = ~purrr::map(predict_safely, ~.x[["result"]][["warnings"]]),
+      predict_message = ~purrr::map(predict_safely, ~.x[["result"]][["messages"]]),
       # extracting result and storing in vector
-      predict_result = ~purrr::map(predict_safely, ~ .x[["result"]][["result"]])
+      predict_result = ~purrr::map(predict_safely, ~.x[["result"]][["result"]])
     )
 
   # RETURN ---------------------------------------------------------------------
@@ -54,16 +54,16 @@ sm_predict <- function(data, method, formula, type, newdata = data,
   # extracting newdata points and predictions from results,
   # and merging with full newdata object
   sm_predict <-
-      newdata %>%
-      dplyr::left_join(
-        wt_models %>%
-          dplyr::select(c("newdata", "predict_result")) %>%
-          tidyr::unnest_(c("newdata", "predict_result")),
-        by = names_newdata
-      )
+    newdata %>%
+    dplyr::left_join(
+      wt_models %>%
+        dplyr::select(c("newdata", "predict_result")) %>%
+        tidyr::unnest_(c("newdata", "predict_result")),
+      by = names_newdata
+    )
 
-  # adding sm_predict
-  attr(sm_prediction$.fitted, "type") <- type
+  # adding sm_predict attributes
+  attr(sm_predict$.fitted, "type") <- type
   if (verbose == TRUE) {
     attr(sm_predict, "wt_models") <- wt_models
   }

@@ -10,7 +10,7 @@
 
 sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
   # if model object is NULL, return empty data frame
-  if (is.null(object))
+  if (is.null(object)) {
     return(
       dplyr::data_frame(
         .fitted = NA_real_,
@@ -19,12 +19,14 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
         .fitted.ul = NA_real_
       )
     )
+  }
 
   # for these outcomes, first must calculate expected, then transform
+  type2 <- type
   if (method == "coxph" & type %in% c("survival", "failure")) {
-    type2 = type
-    type = "expected"
+    type <- "expected"
   }
+
 
   # first calculate predictions for all model types
   prediction <-
@@ -43,8 +45,8 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
     dplyr::as_data_frame() %>%
     purrr::set_names(c(".fitted", ".se.fit")) %>%
     dplyr::mutate_(
-      .fitted.ll = ~.fitted + abs(qnorm((1 - conf.level)/2)) * .se.fit,
-      .fitted.ul = ~.fitted - abs(qnorm((1 - conf.level)/2)) * .se.fit
+      .fitted.ll = ~.fitted + abs(qnorm((1 - conf.level) / 2)) * .se.fit,
+      .fitted.ul = ~.fitted - abs(qnorm((1 - conf.level) / 2)) * .se.fit
     )
 
   # transforming coxph survival and failure
@@ -64,7 +66,7 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
           .vars = c(".fitted", ".fitted.ll", ".fitted.ul"),
           .funs = dplyr::funs(1 - .)
         )
-      }
+    }
   }
 
 

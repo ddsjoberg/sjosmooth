@@ -30,15 +30,14 @@
 #' )
 
 sm_regression <- function(data, method, formula, weighting_var, newdata = data,
-                             method.args = NULL, lambda = 1, kernel = "epanechnikov",
-                             dist.method = "euclidean") {
+                          method.args = NULL, lambda = 1, kernel = "epanechnikov",
+                          dist.method = "euclidean") {
 
   # all variables
   all_vars <- c(all.vars(formula), weighting_var) %>% unique()
-  covar <- all.vars(formula)[[2]]
 
   # converting to tibble, and only keeping required vars
-  newdata_keepvars = intersect(all_vars, names(newdata))
+  newdata_keepvars <- intersect(all_vars, names(newdata))
   newdata <-
     newdata[newdata_keepvars] %>%
     dplyr::as_data_frame() %>%
@@ -65,43 +64,46 @@ sm_regression <- function(data, method, formula, weighting_var, newdata = data,
         function(x) t(x) %>% dplyr::as_data_frame() %>% purrr::set_names(newdata_keepvars)
       )
     ) %>%
-    dplyr::mutate_(
-      # adding scaled newdata points
-      newdata_scaled = ~purrr::map(
-        newdata,
-        ~((.x[weighting_var] - scaled_mean[weighting_var]) / scaled_sd[weighting_var]) %>% dplyr::as_data_frame()
-      ),
-      # calculating distance vector between point and full data (weighting variables only)
-      distance = ~purrr::map(
-        newdata_scaled,
-        ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = dist.method)
-      ),
-      # calculating kernel weights
-      weight = ~purrr::map(
-        distance,
-        ~calculate_weights(
-          dist = .x, lambda = lambda, kernel = kernel,
-          weighting_var = weighting_var
-        )
-      ),
-      # building model, safely
-      model_safely = ~purrr::map(
-        weight,
-        ~do.call_safely(
-          what = method,
-          args = c(method.args,
-                   list(data = data %>% dplyr::filter(.x > 0),
-                        formula = formula,
-                        weights = .x[.x > 0])
+      dplyr::mutate_(
+        # adding scaled newdata points
+        newdata_scaled = ~purrr::map(
+          newdata,
+          ~((.x[weighting_var] - scaled_mean[weighting_var]) / scaled_sd[weighting_var]) %>% dplyr::as_data_frame()
+        ),
+        # calculating distance vector between point and full data (weighting variables only)
+        distance = ~purrr::map(
+          newdata_scaled,
+          ~calculate_dist(data = data_scaled[weighting_var], point = .x, dist_method = dist.method)
+        ),
+        # calculating kernel weights
+        weight = ~purrr::map(
+          distance,
+          ~calculate_weights(
+            dist = .x, lambda = lambda, kernel = kernel,
+            weighting_var = weighting_var
           )
-        )
-      ),
-      # extracting objects, warnings, errors from model_safely object
-      model_error = ~purrr::map(model_safely, ~ .x[["error"]]),
-      model_warning = ~purrr::map(model_safely, ~ .x[["result"]][["warnings"]]),
-      model_message = ~purrr::map(model_safely, ~ .x[["result"]][["messages"]]),
-      model_obj = ~purrr::map(model_safely, ~ .x[["result"]][["result"]])
-    )
+        ),
+        # building model, safely
+        model_safely = ~purrr::map(
+          weight,
+          ~do.call_safely(
+            what = method,
+            args = c(
+              method.args,
+              list(
+                data = data %>% dplyr::filter(.x > 0),
+                formula = formula,
+                weights = .x[.x > 0]
+              )
+            )
+          )
+        ),
+        # extracting objects, warnings, errors from model_safely object
+        model_error = ~purrr::map(model_safely, ~.x[["error"]]),
+        model_warning = ~purrr::map(model_safely, ~.x[["result"]][["warnings"]]),
+        model_message = ~purrr::map(model_safely, ~.x[["result"]][["messages"]]),
+        model_obj = ~purrr::map(model_safely, ~.x[["result"]][["result"]])
+      )
 
   return(results)
 }
