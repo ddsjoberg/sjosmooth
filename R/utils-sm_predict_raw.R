@@ -21,10 +21,11 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
     )
 
   # for these outcomes, first must calculate expected, then transform
+  type2 = type
   if (method == "coxph" & type %in% c("survival", "failure")) {
-    type2 = type
     type = "expected"
   }
+
 
   # first calculate predictions for all model types
   prediction <-

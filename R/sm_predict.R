@@ -24,8 +24,8 @@ sm_predict <- function(data, method, formula, type, newdata = data,
   wt_models <-
     sm_regression(
       data = data, method = method, formula = formula,
-      weighting_var = all.vars(formula)[[2]], newdata = newdata,
-      method.args = method.args, lambda = lambda
+      weighting_var = formula %>% stats::terms() %>% labels(),
+      newdata = newdata, method.args = method.args, lambda = lambda
     )
 
   # PREDICTIONS ----------------------------------------------------------------
@@ -63,7 +63,7 @@ sm_predict <- function(data, method, formula, type, newdata = data,
       )
 
   # adding sm_predict
-  attr(sm_prediction$.fitted, "type") <- type
+  attr(sm_predict$.fitted, "type") <- type
   if (verbose == TRUE) {
     attr(sm_predict, "wt_models") <- wt_models
   }

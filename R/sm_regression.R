@@ -35,7 +35,6 @@ sm_regression <- function(data, method, formula, weighting_var, newdata = data,
 
   # all variables
   all_vars <- c(all.vars(formula), weighting_var) %>% unique()
-  covar <- all.vars(formula)[[2]]
 
   # converting to tibble, and only keeping required vars
   newdata_keepvars = intersect(all_vars, names(newdata))
