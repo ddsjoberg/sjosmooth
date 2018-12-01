@@ -18,11 +18,11 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The `sm_regression()` function performs kernel weighted regression.  After the the model is specifed (`data = cancertx, method = "coxph", formula = Surv(time) ~ age`), an ancillary variable is specified (`weighting_var = "marker"`) and the model is estimated weighted on this variable.
+The `sm_regression()` function performs kernel weighted regression.  After the the model is specified (`data = cancertx, method = "coxph", formula = Surv(time) ~ age`), an ancillary variable is specified (`weighting_var = "marker"`) and the model is estimated weighted on this variable.
 
 ## Example 
 
-The function can be computationally intense on large data sets.  THe following code was run to get the example object `sm_regression_ex`.
+The function can be computationally intense on large data sets.  The following code was run to get the example object `sm_regression_ex`.
 
 ```
 sm_regression_ex =
@@ -47,7 +47,7 @@ $$
 \textbf{X}\beta = 0.02 * age
 $$
 
-The beta coeffiicent is the same across all marker levels.  In the figure below, the solid black line is the estiamtes beta coefficient (with 95% CI), and the dashed line is the true value. 
+The beta coefficient is the same across all marker levels.  In the figure below, the solid black line is the estimates beta coefficient (with 95% CI), and the dashed line is the true value. 
 
 ```{r remedy001, messages = F}
 library(sjosmooth)
@@ -68,14 +68,12 @@ plot_data =
   select(newdata, age.coef, age.ci) %>%
   tidyr::unnest(age.ci, newdata)
 
-  
-
 ggplot(plot_data, aes(x = marker, y = age.coef)) +
   geom_line() +
   geom_ribbon(aes(ymin = `2.5 %`, ymax = `97.5 %`), alpha = 0.3) +
   geom_hline(aes(yintercept = 0.02), linetype = "dashed") +
   scale_y_continuous(limits = c(0, 0.04)) +
   labs(
-    y = "beta"
+    y = "beta "
   )
 ```

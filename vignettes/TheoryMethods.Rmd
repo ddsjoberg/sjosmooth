@@ -19,9 +19,9 @@ require(ggplot2)
 
 ## Introduction
 
-The **sjosmooth** package (pronounced sō smüt͟h) was built to perform kernel smoothing on any type of regression model, but the focus is on censored time-to-event or survival data.  The package provides kernel smoothed estimates of survival probabilities at specified times, as well as other outcomes from survival regression models.  The **sm** package is closely related to the **sjosmooth** package in that it also performs kernel smoothing with censored time-to-event data; however, the **sm** package only allows for univariate estimation of a survival quantile (i.e. median survival time) using the Gaussain kernel (`sm::sm.survival()`).  **sjosmooth** allows for the use of other kernels and for an n-dimensional covarite smoothing matrix.
+The **sjosmooth** package (pronounced sō smüt͟h) was built to perform kernel smoothing on any type of regression model, but the focus is on censored time-to-event or survival data.  The package provides kernel smoothed estimates of survival probabilities at specified times, as well as other outcomes from survival regression models.  The **sm** package is closely related to the **sjosmooth** package in that it also performs kernel smoothing with censored time-to-event data; however, the **sm** package only allows for univariate estimation of a survival quantile (i.e. median survival time) using the Gaussian kernel (`sm::sm.survival()`).  **sjosmooth** allows for the use of other kernels and for an n-dimensional covariate smoothing matrix.
 
-I'll do a brief review of the theory underlying kernel smoothing, and a brief review on simulating time-to-event data.  Other vignettes focus on the usage of the **sjosmooth** package in the univariate setting, and for obtaiing kernel-smoothed survival estimates for 2 or more covarites. 
+I'll do a brief review of the theory underlying kernel smoothing, and a brief review on simulating time-to-event data.  Other vignettes focus on the usage of the **sjosmooth** package in the univariate setting, and for obtaining kernel-smoothed survival estimates for 2 or more covariates. 
 
 <left>
 ![](https://raw.githubusercontent.com/simplystats/simplystats.github.io/master/_images/loess.gif){ width=40% } 
@@ -49,7 +49,7 @@ ggplot(data.frame(x=c(-3, 3)), aes(x)) +
         axis.ticks.y = element_blank()) 
 ```
 
-For the Epanechnikov, Tri-cube, and flat kernels, the $\lambda$ paramter is on the standardized scale.  For example, if $\lambda = 1$ then observations within 1 standard deviation would be included in the kernel-weighted estimte.  If $\lambda = 0.5$ then only observations within half a standard deviation would be included.
+For the Epanechnikov, Tri-cube, and flat kernels, the $\lambda$ parameter is on the standardized scale.  For example, if $\lambda = 1$ then observations within 1 standard deviation would be included in the kernel-weighted estimate.  If $\lambda = 0.5$ then only observations within half a standard deviation would be included.
 
 #### Epanechnikov kernel
 The Epanechnikov quadratic kernel is  
@@ -64,10 +64,10 @@ D(t) =
       0 & |t| > 1 \\
 \end{cases}
 $$
-The $\lambda$ paramter is the radius of the circle (or hypersphere for higher dimensions).  Any observation that is further than $\lambda$ units from $x_0$ is not included in the weighted estimate.  Observations closer to $x_0$ recieve higher weight.  
+The $\lambda$ parameter is the radius of the circle (or hypersphere for higher dimensions).  Any observation that is further than $\lambda$ units from $x_0$ is not included in the weighted estimate.  Observations closer to $x_0$ receive higher weight.  
 
 #### Tri-cube kernel 
-The tri-cube kernel is similalry defined similarly to the Epanechnikov kernel, except
+The tri-cube kernel is similarly defined similarly to the Epanechnikov kernel, except
 $$
 D(t) = 
 \begin{cases} 
@@ -111,7 +111,7 @@ which is simply $1 - F(t; \boldsymbol{X})$.  $F(t; X)$ is well known to follow a
 $$
 T = H_0^{-1}(- \log (U)exp(-\boldsymbol{X}\beta))
 $$
-Becuase we've assumed a simple baseline hazard, $H_0^{-1}(t) = t$.  Therefore, 
+Because we've assumed a simple baseline hazard, $H_0^{-1}(t) = t$.  Therefore, 
 $$
 T = - \log (U)exp(-\boldsymbol{X}\beta)
 $$

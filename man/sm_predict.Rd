@@ -16,8 +16,8 @@ sm_predict(data, method, formula, type, newdata = data,
 
 \item{type}{type of statistic to smooth (e.g. survival, median survival, etc.)}
 
-\item{newdata}{new data frame.  Default is `data`. Only requires covarites from
-the RHS of `~` and the time compenent from the outcome for some survival estimators.}
+\item{newdata}{new data frame.  Default is `data`. Only requires covariates from
+the RHS of `~` and the time component from the outcome for some survival estimators.}
 
 \item{method.args}{List of additional arguments passed on to the
 modelling function defined by `method`}

@@ -1,6 +1,6 @@
 #' Kernel-weighted regression modelling
 #'
-#' General function that fits weighted regerssion models, where the weights
+#' General function that fits weighted regression models, where the weights
 #' are calculated from a ancillary variable(s) or from variable(s) found in the
 #' regression model. Using `data`, `method`, and `formula` the regression model is
 #' estimated; the estimates are weighted by the variable(s) listed in `weighting_var`.
