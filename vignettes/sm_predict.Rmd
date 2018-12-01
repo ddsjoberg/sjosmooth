@@ -91,10 +91,24 @@ marker.seq =
   arrange(marker) %>%
   pull()
 
-sm_predict_ex2 %>%
+# adding true risk to dataset
+sm_predict_ex2 = 
+  sm_predict_ex2 %>%
   mutate(
-    survt1 = exp(-exp((1/50) * age - 0.2 * marker))
-  ) %>%
+    survt1 = exp(-exp((1/50) * age - 0.2 * marker)),
+    surv_diff = survt1 - .fitted
+  )
+
+# plot histogram of differences between fitted and true
+sm_predict_ex2 %>%
+  ggplot(aes(x = surv_diff)) +
+  geom_histogram() +
+  labs(
+    title = "Distribution",
+    x = "Difference in estimated survival and true survival"
+  )
+
+sm_predict_ex2 %>%
   select(marker, age, survt1) %>%
   tidyr::spread(age, survt1) %>%
   select(-marker) %>%
