@@ -62,7 +62,7 @@ sm_predict <- function(data, method, formula, type, newdata = data,
       by = names_newdata
     )
 
-  # adding sm_predict
+  # adding sm_predict attributes
   attr(sm_predict$.fitted, "type") <- type
   if (verbose == TRUE) {
     attr(sm_predict, "wt_models") <- wt_models
