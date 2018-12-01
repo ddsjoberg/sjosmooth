@@ -87,62 +87,6 @@
 <p>You can install the released version of sjosmooth from GitHub with:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">remotes<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">"ddsjoberg/sjosmooth"</span>)</a></code></pre></div>
 </div>
-<div id="example" class="section level2">
-<h2 class="hasAnchor">
-<a href="#example" class="anchor"></a>Example</h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(sjosmooth)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">library</span>(purrr)</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="kw">library</span>(tidyr)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="kw">library</span>(ggplot2)</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="kw">library</span>(survival)</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="kw"><a href="reference/sm_predict.html">sm_predict</a></span>(</a>
-<a class="sourceLine" id="cb2-9" data-line-number="9">  <span class="dt">data =</span> lung,</a>
-<a class="sourceLine" id="cb2-10" data-line-number="10">  <span class="dt">method =</span> <span class="st">"coxph"</span>,</a>
-<a class="sourceLine" id="cb2-11" data-line-number="11">  <span class="dt">formula =</span> <span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span>age,</a>
-<a class="sourceLine" id="cb2-12" data-line-number="12">  <span class="dt">type =</span> <span class="st">"survival"</span>,</a>
-<a class="sourceLine" id="cb2-13" data-line-number="13">  <span class="dt">lambda =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb2-14" data-line-number="14">  <span class="dt">newdata =</span> lung <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">time =</span> <span class="dv">500</span>, <span class="dt">age =</span> <span class="dv">60</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(time, status, age) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>()</a>
-<a class="sourceLine" id="cb2-15" data-line-number="15">) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-16" data-line-number="16"><span class="st">  </span><span class="kw">arrange</span>(age) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-17" data-line-number="17"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> age, <span class="dt">y =</span> .fitted, <span class="dt">color =</span> <span class="kw">factor</span>(status))) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-18" data-line-number="18"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-19" data-line-number="19"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> .fitted.ll, <span class="dt">ymax =</span> .fitted.ul), <span class="dt">alpha =</span> <span class="fl">0.4</span>)</a></code></pre></div>
-<p><img src="reference/figures/README-example-1.png" width="100%"></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="kw"><a href="reference/sm_regression.html">sm_regression</a></span>(</a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"> <span class="dt">data =</span> mtcars,</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"> <span class="dt">method =</span> <span class="st">"lm"</span>,</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"> <span class="dt">formula =</span> mpg <span class="op">~</span><span class="st"> </span>am,</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"> <span class="dt">weighting_var =</span> <span class="st">"hp"</span>,</a>
-<a class="sourceLine" id="cb3-8" data-line-number="8"> <span class="dt">lambda =</span> <span class="dv">2</span></a>
-<a class="sourceLine" id="cb3-9" data-line-number="9">) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-10" data-line-number="10"><span class="st">  </span><span class="kw">mutate</span>(</a>
-<a class="sourceLine" id="cb3-11" data-line-number="11">     <span class="co"># tidying model</span></a>
-<a class="sourceLine" id="cb3-12" data-line-number="12">        <span class="dt">model_tidy =</span> <span class="kw">map</span>(</a>
-<a class="sourceLine" id="cb3-13" data-line-number="13">          model_obj,</a>
-<a class="sourceLine" id="cb3-14" data-line-number="14">          <span class="op">~</span>broom<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/broom/topics/tidy">tidy</a></span>(.x, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb3-15" data-line-number="15"><span class="st">            </span>dplyr<span class="op">::</span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/se-deprecated.html">filter_</a></span>(<span class="op">~</span>term <span class="op">==</span><span class="st"> "am"</span>)</a>
-<a class="sourceLine" id="cb3-16" data-line-number="16">        )</a>
-<a class="sourceLine" id="cb3-17" data-line-number="17">  ) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb3-18" data-line-number="18"><span class="st">  </span><span class="kw">select</span>(newdata, model_tidy) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-19" data-line-number="19"><span class="st">  </span><span class="kw">unnest</span>(newdata) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-20" data-line-number="20"><span class="st">  </span><span class="kw">unnest</span>(model_tidy) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-21" data-line-number="21"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> hp, <span class="dt">y =</span> estimate)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-22" data-line-number="22"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-23" data-line-number="23"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> conf.low, <span class="dt">ymax =</span> conf.high), <span class="dt">alpha =</span> <span class="fl">0.4</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb3-24" data-line-number="24"><span class="st">  </span><span class="kw">geom_hline</span>(</a>
-<a class="sourceLine" id="cb3-25" data-line-number="25">    <span class="dt">yintercept =</span> <span class="kw">lm</span>(mpg <span class="op">~</span><span class="st"> </span>am, mtcars) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">coef</span>() <span class="op">%&gt;%</span><span class="st"> </span>purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/pluck">pluck</a></span>(<span class="dv">2</span>),</a>
-<a class="sourceLine" id="cb3-26" data-line-number="26">    <span class="dt">linetype =</span> <span class="st">"dashed"</span></a>
-<a class="sourceLine" id="cb3-27" data-line-number="27">    ) <span class="op">+</span></a>
-<a class="sourceLine" id="cb3-28" data-line-number="28"><span class="st">  </span><span class="kw">labs</span>(</a>
-<a class="sourceLine" id="cb3-29" data-line-number="29">    <span class="dt">y =</span> <span class="st">"Slope Coefficient for 'am' regressed on 'mpg'"</span></a>
-<a class="sourceLine" id="cb3-30" data-line-number="30">  )</a></code></pre></div>
-<p><img src="reference/figures/README-example-2.png" width="100%"></p>
-</div>
 </div>
   </div>
 
