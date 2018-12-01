@@ -68,14 +68,12 @@ plot_data =
   select(newdata, age.coef, age.ci) %>%
   tidyr::unnest(age.ci, newdata)
 
-  
-
 ggplot(plot_data, aes(x = marker, y = age.coef)) +
   geom_line() +
   geom_ribbon(aes(ymin = `2.5 %`, ymax = `97.5 %`), alpha = 0.3) +
   geom_hline(aes(yintercept = 0.02), linetype = "dashed") +
   scale_y_continuous(limits = c(0, 0.04)) +
   labs(
-    y = "beta"
+    y = "beta "
   )
 ```
