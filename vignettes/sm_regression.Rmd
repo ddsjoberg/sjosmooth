@@ -25,13 +25,15 @@ The `sm_regression()` function performs kernel weighted regression.  After the t
 The function can be computationally intense on large data sets.  The following code was run to get the example object `sm_regression_ex`.
 
 ```
+library(survival)
+library(sjosmooth)
 sm_regression_ex =
-  sjosmooth::sm_regression(
+  sm_regression(
     data = cancertx,
     method = "coxph",
     formula = Surv(time) ~ age,
     weighting_var = "marker",
-    newdata = dplyr::data_frame(marker = seq(7, 12, 0.5))
+    newdata = dplyr::data_frame(marker = seq(5, 15, 0.5))
   )
 ```
 
@@ -55,8 +57,8 @@ library(survival)
 library(dplyr)
 library(ggplot2)
 # loading data and example results from sjosmooth github page
-load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"))
 load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"))
+load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"))
 
 # plotting regression model coefficient by marker level
 plot_data =
