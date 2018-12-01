@@ -122,29 +122,30 @@
 <a class="sourceLine" id="cb2-10" data-line-number="10"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co">#&gt;     intersect, setdiff, setequal, union</span></a>
 <a class="sourceLine" id="cb2-12" data-line-number="12"><span class="kw">library</span>(ggplot2)</a>
-<a class="sourceLine" id="cb2-13" data-line-number="13"><span class="co"># loading example results from sjosmooth github page</span></a>
+<a class="sourceLine" id="cb2-13" data-line-number="13"><span class="co"># loading data and example results from sjosmooth github page</span></a>
 <a class="sourceLine" id="cb2-14" data-line-number="14"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"</span>))</a>
-<a class="sourceLine" id="cb2-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb2-16" data-line-number="16"><span class="co"># plotting regression model coefficient by marker level</span></a>
-<a class="sourceLine" id="cb2-17" data-line-number="17">plot_data =</a>
-<a class="sourceLine" id="cb2-18" data-line-number="18"><span class="st">  </span>sm_regression_ex1 <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-19" data-line-number="19"><span class="st">  </span><span class="kw">mutate</span>(</a>
-<a class="sourceLine" id="cb2-20" data-line-number="20">    <span class="dt">age.coef =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(model_obj, <span class="op">~</span><span class="kw">coef</span>(.x)),</a>
-<a class="sourceLine" id="cb2-21" data-line-number="21">    <span class="dt">age.ci =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map</a></span>(model_obj, <span class="op">~</span><span class="kw">confint</span>(.x) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as_data_frame</span>())</a>
-<a class="sourceLine" id="cb2-22" data-line-number="22">  ) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-23" data-line-number="23"><span class="st">  </span><span class="kw">select</span>(newdata, age.coef, age.ci) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-24" data-line-number="24"><span class="st">  </span>tidyr<span class="op">::</span><span class="kw"><a href="https://tidyr.tidyverse.org/reference/unnest.html">unnest</a></span>(age.ci, newdata)</a>
-<a class="sourceLine" id="cb2-25" data-line-number="25"></a>
-<a class="sourceLine" id="cb2-26" data-line-number="26">  </a>
-<a class="sourceLine" id="cb2-27" data-line-number="27"></a>
-<a class="sourceLine" id="cb2-28" data-line-number="28"><span class="kw">ggplot</span>(plot_data, <span class="kw">aes</span>(<span class="dt">x =</span> marker, <span class="dt">y =</span> age.coef)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-29" data-line-number="29"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-30" data-line-number="30"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> <span class="st">`</span><span class="dt">2.5 %</span><span class="st">`</span>, <span class="dt">ymax =</span> <span class="st">`</span><span class="dt">97.5 %</span><span class="st">`</span>), <span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="st">  </span><span class="kw">geom_hline</span>(<span class="kw">aes</span>(<span class="dt">yintercept =</span> <span class="fl">0.02</span>), <span class="dt">linetype =</span> <span class="st">"dashed"</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-32" data-line-number="32"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.04</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-33" data-line-number="33"><span class="st">  </span><span class="kw">labs</span>(</a>
-<a class="sourceLine" id="cb2-34" data-line-number="34">    <span class="dt">y =</span> <span class="st">"beta"</span></a>
-<a class="sourceLine" id="cb2-35" data-line-number="35">  )</a></code></pre></div>
+<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"</span>))</a>
+<a class="sourceLine" id="cb2-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb2-17" data-line-number="17"><span class="co"># plotting regression model coefficient by marker level</span></a>
+<a class="sourceLine" id="cb2-18" data-line-number="18">plot_data =</a>
+<a class="sourceLine" id="cb2-19" data-line-number="19"><span class="st">  </span>sm_regression_ex1 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-20" data-line-number="20"><span class="st">  </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb2-21" data-line-number="21">    <span class="dt">age.coef =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(model_obj, <span class="op">~</span><span class="kw">coef</span>(.x)),</a>
+<a class="sourceLine" id="cb2-22" data-line-number="22">    <span class="dt">age.ci =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map</a></span>(model_obj, <span class="op">~</span><span class="kw">confint</span>(.x) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as_data_frame</span>())</a>
+<a class="sourceLine" id="cb2-23" data-line-number="23">  ) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-24" data-line-number="24"><span class="st">  </span><span class="kw">select</span>(newdata, age.coef, age.ci) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb2-25" data-line-number="25"><span class="st">  </span>tidyr<span class="op">::</span><span class="kw"><a href="https://tidyr.tidyverse.org/reference/unnest.html">unnest</a></span>(age.ci, newdata)</a>
+<a class="sourceLine" id="cb2-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb2-27" data-line-number="27">  </a>
+<a class="sourceLine" id="cb2-28" data-line-number="28"></a>
+<a class="sourceLine" id="cb2-29" data-line-number="29"><span class="kw">ggplot</span>(plot_data, <span class="kw">aes</span>(<span class="dt">x =</span> marker, <span class="dt">y =</span> age.coef)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-30" data-line-number="30"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> <span class="st">`</span><span class="dt">2.5 %</span><span class="st">`</span>, <span class="dt">ymax =</span> <span class="st">`</span><span class="dt">97.5 %</span><span class="st">`</span>), <span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-32" data-line-number="32"><span class="st">  </span><span class="kw">geom_hline</span>(<span class="kw">aes</span>(<span class="dt">yintercept =</span> <span class="fl">0.02</span>), <span class="dt">linetype =</span> <span class="st">"dashed"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-33" data-line-number="33"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.04</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-34" data-line-number="34"><span class="st">  </span><span class="kw">labs</span>(</a>
+<a class="sourceLine" id="cb2-35" data-line-number="35">    <span class="dt">y =</span> <span class="st">"beta"</span></a>
+<a class="sourceLine" id="cb2-36" data-line-number="36">  )</a></code></pre></div>
 <p><img src="sm_regression_files/figure-html/remedy001-1.png" width="700"></p>
 </div>
   </div>
