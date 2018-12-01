@@ -24,7 +24,7 @@ sm_predict <- function(data, method, formula, type, newdata = data,
   wt_models <-
     sm_regression(
       data = data, method = method, formula = formula,
-      weighting_var = formula %>% stats::terms() %>% labels(),
+      weighting_var = all.vars(formula[-2]), # vars on RHS of ~
       newdata = newdata, method.args = method.args, lambda = lambda
     )
 
