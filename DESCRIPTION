@@ -21,6 +21,7 @@ Suggests:
     rmarkdown,
     ggplot2,
     survival,
-    plotly
+    plotly,
+    testthat
 Language: en-US
 VignetteBuilder: knitr

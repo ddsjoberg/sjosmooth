@@ -6,6 +6,8 @@
 \alias{sjosmooth-package}
 \title{sjosmooth: Kernel smoothing for time to event data}
 \description{
+\if{html}{\figure{logo.png}{options: align='right'}}
+
 What the package does (one paragraph).
 }
 \author{

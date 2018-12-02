@@ -1,7 +1,7 @@
-#' Kernel-weighted regression estimation
+#' Kernel-weighted predictions from regression models
 #'
-#' Provides smoothed estimates from a variety of models, but was built to work
-#' primarily with time to event endpoints.
+#' Calculates kernel-weighted predictions from regression models
+#' (i.e. outcomes that can be calculated from the predict function).
 #'
 #' @param data data frame
 #' @param method function to use
@@ -15,6 +15,14 @@
 #' The standard deviation for the Gaussian kernel
 #' @param verbose Return full set of results. Default is `FALSE`
 #' @export
+#' @examples
+#' sm_predict(
+#'   mtcars,
+#'   method = "glm",
+#'   formula = am ~ mpg,
+#'   method.args = list(family = binomial(link = "logit")),
+#'   type = "response"
+#' )
 
 sm_predict <- function(data, method, formula, type, newdata = data,
                        method.args = NULL, lambda = 1,
