@@ -7,9 +7,9 @@ cancertx <-
   dplyr::data_frame(
     age = rnorm(n, 30, 10),
     marker = rnorm(n, 10, 2),
-    xb = (1/50) * age - 0.2 * marker,
-    xb_marker = (1/50) * 30 - 0.2 * marker,
-    xb_age = (1/50) * age - 0.2 * 10,
+    xb = (1 / 50) * age - 0.2 * marker,
+    xb_marker = (1 / 50) * 30 - 0.2 * marker,
+    xb_age = (1 / 50) * age - 0.2 * 10,
     time = -log(runif(n, 0, 1)) * exp(-xb),
     # getting the true survival probabilites at time 1 using x
     survt1 = exp(-exp(xb)),
@@ -28,7 +28,7 @@ save(cancertx, file = "examples/cancertx.rda")
 
 # saving out example results
 library(survival)
-sm_regression_ex1 =
+sm_regression_ex1 <-
   sjosmooth::sm_regression(
     data = cancertx,
     method = "coxph",
@@ -38,7 +38,7 @@ sm_regression_ex1 =
   )
 save(sm_regression_ex1, file = "examples/sm_regression_ex1.rda")
 
-sm_predict_ex1 =
+sm_predict_ex1 <-
   sjosmooth::sm_predict(
     data = cancertx,
     method = "coxph",
@@ -50,7 +50,7 @@ sm_predict_ex1 =
 save(sm_predict_ex1, file = "examples/sm_predict_ex1.rda")
 
 
-sm_predict_ex2 =
+sm_predict_ex2 <-
   sjosmooth::sm_predict(
     data = cancertx,
     method = "coxph",
@@ -59,9 +59,9 @@ sm_predict_ex2 =
       list(
         marker = seq(7, 13, 1),
         age = seq(20, 40, 2)
-        ) %>%
-      purrr::cross_df() %>%
-      dplyr::mutate(time = 1),
+      ) %>%
+        purrr::cross_df() %>%
+        dplyr::mutate(time = 1),
     type = "survival",
     verbose = TRUE
   )

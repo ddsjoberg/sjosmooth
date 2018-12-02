@@ -1,0 +1,93 @@
+---
+title: "Simulation Checks of Functions"
+author: "Daniel D. Sjoberg"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Simulate Data
+
+First, we'll simulated data with a changing beta coefficient.
+
+```{r remedy001}
+library(dplyr)
+library(ggplot2)
+library(survival)
+library(sjosmooth)
+
+set.seed(23423)
+n = 10000
+dta_sim =
+  dplyr::data_frame(
+    x = rnorm(n),
+    beta = case_when(
+      x <= 0 ~ 0,
+      x > 0 ~ 1
+    ),
+    xb = beta * x,
+    time = -log(runif(n, 0, 1)) * exp(-xb),
+    # getting the true survival probabilites at time 1 using x
+    survt1 = exp(-exp(xb))
+  )
+
+ggplot(dta_sim, aes(x = x, y = survt1)) + 
+  geom_line() +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  labs(
+    title = "True 1 Year Survival"
+  )
+```
+
+## sm_regression
+
+Dashed line is the true beta coefficient, and the solid line is the estimated slope coefficient from the `sm_regression()` function.
+
+```{r remedy002}
+ex1 = 
+  sm_regression(
+    dta_sim, 
+    method = "coxph",
+    formula = Surv(time) ~ x,
+    weighting_var = "x",
+    newdata = data_frame(x = seq(-3, 3, by = 0.2), time = 1)
+  )
+
+ex1 %>%
+  mutate(
+    tidy = purrr::map(model_obj, ~broom::tidy(.x, conf.int = TRUE))
+  ) %>%
+  filter(purrr::map_lgl(model_obj, ~!is.null(.x))) %>%
+  select(newdata, tidy) %>%
+  tidyr::unnest(newdata, tidy) %>%
+  ggplot(aes(x = x, y = estimate)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.3) +
+  geom_line(data = dta_sim %>% filter(x > -3 & x < 3), aes(x = x, y = beta), linetype = "dashed") +
+  scale_y_continuous(limits = c(-0.2, 1.2))
+```
+
+## sm_predict
+
+Dashed line is the true 1 year survival, and the solid line is the estimated 1 year survival from the `sm_predict()` function.
+
+```{r remedy003}
+ex2 = 
+  sm_predict(
+    dta_sim, 
+    method = "coxph",
+    formula = Surv(time) ~ x,
+    newdata = data_frame(x = seq(-3, 3, by = 0.2), time = 1),
+    type = "survival"
+  )
+
+ex2 %>%
+  ggplot(aes(x = x, y = .fitted)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = .fitted.ll, ymax = .fitted.ul), alpha = 0.3) +
+  geom_line(data = dta_sim %>% filter(x > -3 & x < 3), aes(x = x, y = survt1), linetype = "dashed") +
+  scale_y_continuous(limits = c(0, 0.5)) 
+```

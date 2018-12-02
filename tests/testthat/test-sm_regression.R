@@ -1,7 +1,7 @@
 context("test-sm_regression")
 
 test_that("sm_regression creates output without error/warning: glm", {
-  glm_ex =
+  glm_ex <-
     sm_regression(
       data = mtcars,
       method = "glm",
@@ -16,13 +16,13 @@ test_that("sm_regression creates output without error/warning: glm", {
 
 test_that("sm_regression creates output without error/warning: coxph", {
   library(survival)
-  coxph_ex =
+  coxph_ex <-
     sm_regression(
-    data = lung,
-    method = "coxph",
-    formula = Surv(time, status) ~ age,
-    weighting_var = "meal.cal"
-  )
+      data = lung,
+      method = "coxph",
+      formula = Surv(time, status) ~ age,
+      weighting_var = "meal.cal"
+    )
 
   expect_error(coxph_ex, NA)
   expect_warning(coxph_ex, NA)
