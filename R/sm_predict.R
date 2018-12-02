@@ -13,6 +13,10 @@
 #' modelling function defined by `method`
 #' @param lambda The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 #' The standard deviation for the Gaussian kernel
+#' @param kernel Specifies the kernel to be used: `epanechnikov`, `tricube`,
+#' `gaussian`, and `flat` are accepted. Default is `epanechnikov`
+#' @param dist.method Specifies the distance measure to be used in the kernel.
+#' Default is `euclidean`. Distance measures accepted by
 #' @param verbose Return full set of results. Default is `FALSE`
 #' @export
 #' @examples
@@ -25,15 +29,16 @@
 #' )
 
 sm_predict <- function(data, method, formula, type, newdata = data,
-                       method.args = NULL, lambda = 1,
-                       verbose = FALSE) {
+                       method.args = NULL, lambda = 1, kernel = "epanechnikov",
+                       dist.method = "euclidean", verbose = FALSE) {
 
   # WEIGHTED REGRESSION MODELS -------------------------------------------------
   wt_models <-
     sm_regression(
       data = data, method = method, formula = formula,
       weighting_var = all.vars(formula[-2]), # vars on RHS of ~
-      newdata = newdata, method.args = method.args, lambda = lambda
+      newdata = newdata, method.args = method.args,
+      kernel = kernel, dist.method = dist.method, lambda = lambda
     )
 
   # PREDICTIONS ----------------------------------------------------------------
