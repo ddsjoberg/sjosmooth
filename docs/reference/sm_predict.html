@@ -6,13 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Kernel-weighted regression estimation — sm_predict • sjosmooth</title>
+<title>Kernel-weighted predictions from regression models — sm_predict • sjosmooth</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/yeti/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,10 +30,12 @@
 
 
 
-<meta property="og:title" content="Kernel-weighted regression estimation — sm_predict" />
+<meta property="og:title" content="Kernel-weighted predictions from regression models — sm_predict" />
 
-<meta property="og:description" content="Provides smoothed estimates from a variety of models, but was built to work
-primarily with time to event endpoints." />
+<meta property="og:description" content="Calculates kernel-weighted predictions from regression models
+(i.e. outcomes that can be calculated from the predict function)." />
+
+<meta property="og:image" content="http://www.danieldsjoberg.com/sjosmooth/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -70,7 +72,7 @@ primarily with time to event endpoints." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fa fa-home"></span>
      
   </a>
 </li>
@@ -79,23 +81,31 @@ primarily with time to event endpoints." />
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
+    Tutorials
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/sm_regression.html">sm_regression</a>
+      <a href="../articles/TheoryMethods.html">Methods</a>
     </li>
     <li>
-      <a href="../articles/TheoryMethods.html">Theory and Methods</a>
+      <a href="../articles/sm_predict.html">sm_predict()</a>
+    </li>
+    <li>
+      <a href="../articles/sm_regression.html">sm_regression()</a>
     </li>
   </ul>
 </li>
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/ddsjoberg/sjosmooth">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -108,15 +118,15 @@ primarily with time to event endpoints." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Kernel-weighted regression estimation</h1>
+    <h1>Kernel-weighted predictions from regression models</h1>
     
     <div class="hidden name"><code>sm_predict.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Provides smoothed estimates from a variety of models, but was built to work
-primarily with time to event endpoints.</p>
+    <p>Calculates kernel-weighted predictions from regression models
+(i.e. outcomes that can be calculated from the predict function).</p>
     
     </div>
 
@@ -144,8 +154,8 @@ primarily with time to event endpoints.</p>
     </tr>
     <tr>
       <th>newdata</th>
-      <td><p>new data frame.  Default is `data`. Only requires covarites from
-the RHS of `~` and the time compenent from the outcome for some survival estimators.</p></td>
+      <td><p>new data frame.  Default is `data`. Only requires covariates from
+the RHS of `~` and the time component from the outcome for some survival estimators.</p></td>
     </tr>
     <tr>
       <th>method.args</th>
@@ -164,12 +174,87 @@ The standard deviation for the Gaussian kernel</p></td>
     </table>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'>sm_predict</span>(
+  <span class='no'>mtcars</span>,
+  <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"glm"</span>,
+  <span class='kw'>formula</span> <span class='kw'>=</span> <span class='no'>am</span> ~ <span class='no'>mpg</span>,
+  <span class='kw'>method.args</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'>binomial</span>(<span class='kw'>link</span> <span class='kw'>=</span> <span class='st'>"logit"</span>)),
+  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"response"</span>
+)</div><div class='output co'>#&gt;     mpg cyl  disp  hp drat    wt  qsec vs am gear carb      .fitted
+#&gt; 1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4 4.089578e-01
+#&gt; 2  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4 4.089578e-01
+#&gt; 3  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1 5.504164e-01
+#&gt; 4  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1 4.370929e-01
+#&gt; 5  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2 3.016828e-01
+#&gt; 6  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1 2.728354e-01
+#&gt; 7  14.3   8 360.0 245 3.21 3.570 15.84  0  0    3    4 1.461361e-01
+#&gt; 8  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2 6.456536e-01
+#&gt; 9  22.8   4 140.8  95 3.92 3.150 22.90  1  0    4    2 5.504164e-01
+#&gt; 10 19.2   6 167.6 123 3.92 3.440 18.30  1  0    4    4 3.238854e-01
+#&gt; 11 17.8   6 167.6 123 3.92 3.440 18.90  1  0    4    4 2.580795e-01
+#&gt; 12 16.4   8 275.8 180 3.07 4.070 17.40  0  0    3    3 1.993910e-01
+#&gt; 13 17.3   8 275.8 180 3.07 3.730 17.60  0  0    3    3 2.351012e-01
+#&gt; 14 15.2   8 275.8 180 3.07 3.780 18.00  0  0    3    3 1.621707e-01
+#&gt; 15 10.4   8 472.0 205 2.93 5.250 17.98  0  0    3    4 1.057911e-05
+#&gt; 16 10.4   8 460.0 215 3.00 5.424 17.82  0  0    3    4 1.057911e-05
+#&gt; 17 14.7   8 440.0 230 3.23 5.345 17.42  0  0    3    4 1.535469e-01
+#&gt; 18 32.4   4  78.7  66 4.08 2.200 19.47  1  1    4    1 1.000000e+00
+#&gt; 19 30.4   4  75.7  52 4.93 1.615 18.52  1  1    4    2 1.000000e+00
+#&gt; 20 33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1 1.000000e+00
+#&gt; 21 21.5   4 120.1  97 3.70 2.465 20.01  1  0    3    1 4.449265e-01
+#&gt; 22 15.5   8 318.0 150 2.76 3.520 16.87  0  0    3    2 1.685713e-01
+#&gt; 23 15.2   8 304.0 150 3.15 3.435 17.30  0  0    3    2 1.621707e-01
+#&gt; 24 13.3   8 350.0 245 3.73 3.840 15.41  0  0    3    4 1.201609e-01
+#&gt; 25 19.2   8 400.0 175 3.08 3.845 17.05  0  0    3    2 3.238854e-01
+#&gt; 26 27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1 9.454960e-01
+#&gt; 27 26.0   4 120.3  91 4.43 2.140 16.70  0  1    5    2 7.926169e-01
+#&gt; 28 30.4   4  95.1 113 3.77 1.513 16.90  1  1    5    2 1.000000e+00
+#&gt; 29 15.8   8 351.0 264 4.22 3.170 14.50  0  1    5    4 1.774318e-01
+#&gt; 30 19.7   6 145.0 175 3.62 2.770 15.50  0  1    5    6 3.448688e-01
+#&gt; 31 15.0   8 301.0 335 3.54 3.570 14.60  0  1    5    8 1.590070e-01
+#&gt; 32 21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2 4.370929e-01
+#&gt;         .se.fit   .fitted.ll    .fitted.ul
+#&gt; 1  1.605601e-01 0.7236497467  0.0942657686
+#&gt; 2  1.605601e-01 0.7236497467  0.0942657686
+#&gt; 3  1.989579e-01 0.9403666696  0.1604662145
+#&gt; 4  1.686849e-01 0.7677092837  0.1064765270
+#&gt; 5  1.327653e-01 0.5618980073  0.0414676019
+#&gt; 6  1.297424e-01 0.5271258835  0.0185449014
+#&gt; 7  1.297923e-01 0.4005244323 -0.1082521649
+#&gt; 8  2.373126e-01 1.1107777466  0.1805294860
+#&gt; 9  1.989579e-01 0.9403666696  0.1604662145
+#&gt; 10 1.358149e-01 0.5900775926  0.0576931317
+#&gt; 11 1.281603e-01 0.5092691461  0.0068898266
+#&gt; 12 1.256516e-01 0.4456636318 -0.0468816014
+#&gt; 13 1.263725e-01 0.4827868752 -0.0125844075
+#&gt; 14 1.232167e-01 0.4036710888 -0.0793296119
+#&gt; 15 2.080040e-04 0.0004182595 -0.0003971012
+#&gt; 16 2.080040e-04 0.0004182595 -0.0003971012
+#&gt; 17 1.254973e-01 0.3995169931 -0.0924232175
+#&gt; 18 3.170142e-06 1.0000062133  0.9999937866
+#&gt; 19 5.989392e-11 1.0000000001  0.9999999999
+#&gt; 20 4.930265e-06 1.0000096631  0.9999903368
+#&gt; 21 1.708564e-01 0.7797989043  0.1100541337
+#&gt; 22 1.236400e-01 0.4109011979 -0.0737586935
+#&gt; 23 1.232167e-01 0.4036710888 -0.0793296119
+#&gt; 24 1.448802e-01 0.4041208926 -0.1637990571
+#&gt; 25 1.358149e-01 0.5900775926  0.0576931317
+#&gt; 26 1.565122e-01 1.2522542464  0.6387378401
+#&gt; 27 2.385068e-01 1.2600817231  0.3251520859
+#&gt; 28 5.989392e-11 1.0000000001  0.9999999999
+#&gt; 29 1.240132e-01 0.4204932738 -0.0656296562
+#&gt; 30 1.402723e-01 0.6197973726  0.0699402132
+#&gt; 31 1.230513e-01 0.4001831211 -0.0821690471
+#&gt; 32 1.686849e-01 0.7677092837  0.1064765270</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-                </ul>
+            
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

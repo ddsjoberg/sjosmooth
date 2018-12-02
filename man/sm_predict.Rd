@@ -2,7 +2,7 @@
 % Please edit documentation in R/sm_predict.R
 \name{sm_predict}
 \alias{sm_predict}
-\title{Kernel-weighted regression estimation}
+\title{Kernel-weighted predictions from regression models}
 \usage{
 sm_predict(data, method, formula, type, newdata = data,
   method.args = NULL, lambda = 1, verbose = FALSE)
@@ -28,6 +28,15 @@ The standard deviation for the Gaussian kernel}
 \item{verbose}{Return full set of results. Default is `FALSE`}
 }
 \description{
-Provides smoothed estimates from a variety of models, but was built to work
-primarily with time to event endpoints.
+Calculates kernel-weighted predictions from regression models
+(i.e. outcomes that can be calculated from the predict function).
+}
+\examples{
+sm_predict(
+  mtcars,
+  method = "glm",
+  formula = am ~ mpg,
+  method.args = list(family = binomial(link = "logit")),
+  type = "response"
+)
 }

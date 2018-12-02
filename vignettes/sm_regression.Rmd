@@ -43,11 +43,7 @@ $$
 \textbf{X}\beta = 0.02 * age - 0.2 * marker
 $$
 
-In the model age and marker level are independent, and therefore, the univariate model is simply
-
-$$
-\textbf{X}\beta = 0.02 * age
-$$
+In the model age and marker level are independent, and therefore, the univariate model the slope coefficient for age remains $\beta_{age} = 0.02$ 
 
 The beta coefficient is the same across all marker levels.  In the figure below, the solid black line is the estimates beta coefficient (with 95% CI), and the dashed line is the true value. 
 

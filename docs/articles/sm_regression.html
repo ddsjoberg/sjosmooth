@@ -6,11 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>sm_regression • sjosmooth</title>
-<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/yeti/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="sm_regression">
 <meta property="og:description" content="">
+<meta property="og:image" content="http://www.danieldsjoberg.com/sjosmooth/logo.png">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -37,7 +38,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fa fa-home"></span>
      
   </a>
 </li>
@@ -46,21 +47,31 @@
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
+    Tutorials
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/sm_regression.html">sm_regression</a>
+      <a href="../articles/TheoryMethods.html">Methods</a>
     </li>
     <li>
-      <a href="../articles/TheoryMethods.html">Theory and Methods</a>
+      <a href="../articles/sm_predict.html">sm_predict()</a>
+    </li>
+    <li>
+      <a href="../articles/sm_regression.html">sm_regression()</a>
     </li>
   </ul>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/ddsjoberg/sjosmooth">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -75,7 +86,7 @@
       <h1>sm_regression</h1>
                         <h4 class="author">Daniel D. Sjoberg</h4>
             
-            <h4 class="date">2018-12-01</h4>
+            <h4 class="date">2018-12-02</h4>
       
       
       <div class="hidden name"><code>sm_regression.Rmd</code></div>
@@ -87,29 +98,28 @@
 <div id="introduction" class="section level2">
 <h2 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h2>
-<p>The <code><a href="../reference/sm_regression.html">sm_regression()</a></code> function performs kernel weighted regression. After the the model is specifed (<code>data = cancertx, method = "coxph", formula = Surv(time) ~ age</code>), an ancillary variable is specified (<code>weighting_var = "marker"</code>) and the model is estimated weighted on this variable.</p>
+<p>The <code><a href="../reference/sm_regression.html">sm_regression()</a></code> function performs kernel weighted regression. After the the model is specified (<code>data = cancertx, method = "coxph", formula = Surv(time) ~ age</code>), an ancillary variable is specified (<code>weighting_var = "marker"</code>) and the model is estimated weighted on this variable.</p>
 </div>
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h2>
-<p>The function can be computationally intense on large data sets. THe following code was run to get the example object <code>sm_regression_ex</code>.</p>
-<pre><code>sm_regression_ex =
-  sjosmooth::sm_regression(
+<p>The function can be computationally intense on large data sets. The following code was run to get the example object <code>sm_regression_ex</code>.</p>
+<pre><code>library(survival)
+library(sjosmooth)
+sm_regression_ex =
+  sm_regression(
     data = cancertx,
     method = "coxph",
     formula = Surv(time) ~ age,
     weighting_var = "marker",
-    newdata = dplyr::data_frame(marker = seq(7, 12, 0.5))
+    newdata = dplyr::data_frame(marker = seq(5, 15, 0.5))
   )</code></pre>
 <p>The data in the <code>cancertx</code> data frame was simulated from a Cox regression model with linear predictor.</p>
 <p><span class="math display">\[
 \textbf{X}\beta = 0.02 * age - 0.2 * marker
 \]</span></p>
-<p>In the model age and marker level are independent, and therefore, the univariate model is simply</p>
-<p><span class="math display">\[
-\textbf{X}\beta = 0.02 * age
-\]</span></p>
-<p>The beta coeffiicent is the same across all marker levels. In the figure below, the solid black line is the estiamtes beta coefficient (with 95% CI), and the dashed line is the true value.</p>
+<p>In the model age and marker level are independent, and therefore, the univariate model the slope coefficient for age remains <span class="math inline">\(\beta_{age} = 0.02\)</span></p>
+<p>The beta coefficient is the same across all marker levels. In the figure below, the solid black line is the estimates beta coefficient (with 95% CI), and the dashed line is the true value.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(sjosmooth)</a>
 <a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">library</span>(survival)</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">library</span>(dplyr)</a>
@@ -123,8 +133,8 @@
 <a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co">#&gt;     intersect, setdiff, setequal, union</span></a>
 <a class="sourceLine" id="cb2-12" data-line-number="12"><span class="kw">library</span>(ggplot2)</a>
 <a class="sourceLine" id="cb2-13" data-line-number="13"><span class="co"># loading data and example results from sjosmooth github page</span></a>
-<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"</span>))</a>
-<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"</span>))</a>
+<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"</span>))</a>
+<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"</span>))</a>
 <a class="sourceLine" id="cb2-16" data-line-number="16"></a>
 <a class="sourceLine" id="cb2-17" data-line-number="17"><span class="co"># plotting regression model coefficient by marker level</span></a>
 <a class="sourceLine" id="cb2-18" data-line-number="18">plot_data =</a>
@@ -136,16 +146,14 @@
 <a class="sourceLine" id="cb2-24" data-line-number="24"><span class="st">  </span><span class="kw">select</span>(newdata, age.coef, age.ci) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb2-25" data-line-number="25"><span class="st">  </span>tidyr<span class="op">::</span><span class="kw"><a href="https://tidyr.tidyverse.org/reference/unnest.html">unnest</a></span>(age.ci, newdata)</a>
 <a class="sourceLine" id="cb2-26" data-line-number="26"></a>
-<a class="sourceLine" id="cb2-27" data-line-number="27">  </a>
-<a class="sourceLine" id="cb2-28" data-line-number="28"></a>
-<a class="sourceLine" id="cb2-29" data-line-number="29"><span class="kw">ggplot</span>(plot_data, <span class="kw">aes</span>(<span class="dt">x =</span> marker, <span class="dt">y =</span> age.coef)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-30" data-line-number="30"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> <span class="st">`</span><span class="dt">2.5 %</span><span class="st">`</span>, <span class="dt">ymax =</span> <span class="st">`</span><span class="dt">97.5 %</span><span class="st">`</span>), <span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-32" data-line-number="32"><span class="st">  </span><span class="kw">geom_hline</span>(<span class="kw">aes</span>(<span class="dt">yintercept =</span> <span class="fl">0.02</span>), <span class="dt">linetype =</span> <span class="st">"dashed"</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-33" data-line-number="33"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.04</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-34" data-line-number="34"><span class="st">  </span><span class="kw">labs</span>(</a>
-<a class="sourceLine" id="cb2-35" data-line-number="35">    <span class="dt">y =</span> <span class="st">"beta"</span></a>
-<a class="sourceLine" id="cb2-36" data-line-number="36">  )</a></code></pre></div>
+<a class="sourceLine" id="cb2-27" data-line-number="27"><span class="kw">ggplot</span>(plot_data, <span class="kw">aes</span>(<span class="dt">x =</span> marker, <span class="dt">y =</span> age.coef)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-28" data-line-number="28"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-29" data-line-number="29"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> <span class="st">`</span><span class="dt">2.5 %</span><span class="st">`</span>, <span class="dt">ymax =</span> <span class="st">`</span><span class="dt">97.5 %</span><span class="st">`</span>), <span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-30" data-line-number="30"><span class="st">  </span><span class="kw">geom_hline</span>(<span class="kw">aes</span>(<span class="dt">yintercept =</span> <span class="fl">0.02</span>), <span class="dt">linetype =</span> <span class="st">"dashed"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.04</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-32" data-line-number="32"><span class="st">  </span><span class="kw">labs</span>(</a>
+<a class="sourceLine" id="cb2-33" data-line-number="33">    <span class="dt">y =</span> <span class="st">"beta "</span></a>
+<a class="sourceLine" id="cb2-34" data-line-number="34">  )</a></code></pre></div>
 <p><img src="sm_regression_files/figure-html/remedy001-1.png" width="700"></p>
 </div>
   </div>

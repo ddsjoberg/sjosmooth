@@ -1,0 +1,30 @@
+url: http://www.danieldsjoberg.com/sjosmooth/
+
+template:
+  params:
+    bootswatch: yeti
+
+navbar:
+  type: default
+  left:
+  - icon: fa-home
+    href: index.html
+  - text: Reference
+    href: reference/index.html
+  - text: Tutorials
+    menu:
+    - text: Methods
+      href: articles/TheoryMethods.html
+    - text: sm_predict()
+      href: articles/sm_predict.html
+    - text: sm_regression()
+      href: articles/sm_regression.html
+  right:
+  - icon: fa-github fa-lg
+    href: https://github.com/ddsjoberg/sjosmooth
+
+reference:
+  - title: "sjosmooth functions"
+    contents:
+      - sm_predict
+      - sm_regression

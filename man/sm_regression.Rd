@@ -2,7 +2,7 @@
 % Please edit documentation in R/sm_regression.R
 \name{sm_regression}
 \alias{sm_regression}
-\title{Kernel-weighted regression modelling}
+\title{Kernel-weighted regression models}
 \usage{
 sm_regression(data, method, formula, weighting_var, newdata = data,
   method.args = NULL, lambda = 1, kernel = "epanechnikov",
@@ -33,17 +33,16 @@ Default is `euclidean`. Distance measures accepted by
 \code{stats::\link[stats]{dist}} is acceptable.}
 }
 \description{
-General function that fits weighted regression models, where the weights
-are calculated from a ancillary variable(s) or from variable(s) found in the
-regression model. Using `data`, `method`, and `formula` the regression model is
-estimated; the estimates are weighted by the variable(s) listed in `weighting_var`.
+The user specifies a regression model and a variable for weighting,
+and `sm_regression`` will estimate a weighted regression model for each
+unique value of the specified variable.
 }
 \examples{
 sm_regression(
   data = mtcars,
-  method = "lm",
-  formula = mpg ~ am ,
-  weighting_var = "hp",
-  lambda = 2
+  method = "glm",
+  formula = am ~ mpg,
+  weighting_var = "mpg",
+  method.args = list(family = binomial(link = "logit"))
 )
 }
