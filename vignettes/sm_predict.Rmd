@@ -99,9 +99,9 @@ sm_predict_ex2 =
 # plot histogram of differences between fitted and true
 sm_predict_ex2 %>%
   ggplot(aes(x = surv_diff)) +
-  geom_histogram() +
+  geom_histogram(bins = 25) +
   labs(
-    title = "Distribution",
+    title = "Difference Distribution",
     x = "Difference in estimated survival and true survival"
   )
 
