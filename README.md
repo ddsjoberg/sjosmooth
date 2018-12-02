@@ -32,3 +32,7 @@ unique value of the specified variable.
 The second function (`sm_predict`) calculates kernel-weighted
 predictions from regression models (i.e. outcomes that can be calculated
 from the `predict` function).
+
+The package was written generally, such that any regression model should
+be compatible. However, only `survival::coxph()`, and
+`survival::survreg()`, `lm()`, and `glm()` models were tested.
