@@ -131,7 +131,8 @@
     </div>
 
     <pre class="usage"><span class='fu'>sm_predict</span>(<span class='no'>data</span>, <span class='no'>method</span>, <span class='no'>formula</span>, <span class='no'>type</span>, <span class='kw'>newdata</span> <span class='kw'>=</span> <span class='no'>data</span>,
-  <span class='kw'>method.args</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+  <span class='kw'>method.args</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>kernel</span> <span class='kw'>=</span> <span class='st'>"epanechnikov"</span>,
+  <span class='kw'>dist.method</span> <span class='kw'>=</span> <span class='st'>"euclidean"</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -166,6 +167,16 @@ modelling function defined by `method`</p></td>
       <th>lambda</th>
       <td><p>The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 The standard deviation for the Gaussian kernel</p></td>
+    </tr>
+    <tr>
+      <th>kernel</th>
+      <td><p>Specifies the kernel to be used: `epanechnikov`, `tricube`,
+`gaussian`, and `flat` are accepted. Default is `epanechnikov`</p></td>
+    </tr>
+    <tr>
+      <th>dist.method</th>
+      <td><p>Specifies the distance measure to be used in the kernel.
+Default is `euclidean`. Distance measures accepted by</p></td>
     </tr>
     <tr>
       <th>verbose</th>

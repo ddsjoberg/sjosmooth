@@ -5,7 +5,8 @@
 \title{Kernel-weighted predictions from regression models}
 \usage{
 sm_predict(data, method, formula, type, newdata = data,
-  method.args = NULL, lambda = 1, verbose = FALSE)
+  method.args = NULL, lambda = 1, kernel = "epanechnikov",
+  dist.method = "euclidean", verbose = FALSE)
 }
 \arguments{
 \item{data}{data frame}
@@ -24,6 +25,12 @@ modelling function defined by `method`}
 
 \item{lambda}{The radius of the kernel for tri-cubic, Epanechnikov, and flat kernels.
 The standard deviation for the Gaussian kernel}
+
+\item{kernel}{Specifies the kernel to be used: `epanechnikov`, `tricube`,
+`gaussian`, and `flat` are accepted. Default is `epanechnikov`}
+
+\item{dist.method}{Specifies the distance measure to be used in the kernel.
+Default is `euclidean`. Distance measures accepted by}
 
 \item{verbose}{Return full set of results. Default is `FALSE`}
 }
