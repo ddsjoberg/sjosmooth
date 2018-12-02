@@ -1,0 +1,142 @@
+---
+title: "sm_predict"
+author: "Daniel D. Sjoberg"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{sm_predict}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+The `sm_predict()` function calculates kernel-smoothed predictions from regression models (i.e. outputs from the `predict()` function).  The following examples focus on time-to-event endpoints.
+
+## Example 1 - Univariate
+
+The function can be computationally intense on large data sets.  The following code was run to get the example object `sm_regression_ex`.
+
+```
+library(survival)
+library(sjosmooth)
+sm_predict_ex1 =
+  sm_predict(
+    data = cancertx,
+    method = "coxph",
+    formula = Surv(time) ~ marker,
+    newdata = dplyr::data_frame(marker = seq(5, 15, 0.5), time = 1),
+    type = "survival",
+    verbose = TRUE
+  )
+```
+
+The data in the `cancertx` data frame was simulated from a Cox regression model with linear predictor.  
+
+$$
+\textbf{X}\beta = 0.02 * age - 0.2 * marker
+$$
+
+In the model age and marker level are independent, and therefore, the univariate model is simply
+
+$$
+\textbf{X}\beta = 0.02 * age
+$$
+
+
+```{r remedy001}
+library(sjosmooth)
+library(survival)
+library(dplyr)
+library(ggplot2)
+# loading data and example results from sjosmooth github page
+load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"))
+load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_predict_ex1.rda?raw=true"))
+
+ggplot(sm_predict_ex1, aes(x = marker, y = .fitted)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = .fitted.ll, ymax = .fitted.ul), alpha = 0.3) +
+  geom_line(
+    data = cancertx %>% filter(marker >= 5 & marker <= 15),
+    aes(x = marker, y = survt1_marker),
+    linetype = "dashed"
+  )
+```
+
+
+## Example 2 - Multivariable
+
+```{r remedy002}
+library(plotly)
+load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_predict_ex2.rda?raw=true"))
+
+age.seq =
+  sm_predict_ex2 %>%
+  select(age) %>%
+  distinct() %>%
+  arrange(age) %>%
+  pull()
+
+marker.seq =
+  sm_predict_ex2 %>%
+  select(marker) %>%
+  distinct() %>%
+  arrange(marker) %>%
+  pull()
+
+# adding true risk to dataset
+sm_predict_ex2 = 
+  sm_predict_ex2 %>%
+  mutate(
+    survt1 = exp(-exp((1/50) * age - 0.2 * marker)),
+    surv_diff = survt1 - .fitted
+  )
+
+# plot histogram of differences between fitted and true
+sm_predict_ex2 %>%
+  ggplot(aes(x = surv_diff)) +
+  geom_histogram() +
+  labs(
+    title = "Distribution",
+    x = "Difference in estimated survival and true survival"
+  )
+
+sm_predict_ex2 %>%
+  select(marker, age, survt1) %>%
+  tidyr::spread(age, survt1) %>%
+  select(-marker) %>%
+  plot_ly(z = ~ as.matrix(.),
+          x = marker.seq,
+          y = age.seq) %>%
+  add_surface(showscale=FALSE) %>%
+  layout(
+    title = "True Risk of Death within 1 Year",
+    scene = list(
+      xaxis = list(title = "Marker"),
+      yaxis = list(title = "Age"),
+      zaxis = list(title = "Risk")
+    ))
+
+sm_predict_ex2 %>%
+  select(marker, age, .fitted) %>%
+  tidyr::spread(age, .fitted) %>%
+  select(-marker) %>%
+  plot_ly(z = ~ as.matrix(.),
+          x = marker.seq,
+          y = age.seq) %>%
+  add_surface(showscale=FALSE) %>%
+  layout(
+    title = "Estimated Risk of Death within 1 Year",
+    scene = list(
+      xaxis = list(title = "Marker"),
+      yaxis = list(title = "Age"),
+      zaxis = list(title = "Risk")
+    ))
+```
