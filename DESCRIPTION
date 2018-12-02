@@ -16,19 +16,19 @@ BugReports: https://github.com/ddsjoberg/sjosmooth/issues
 Depends: 
     R (>= 3.5)
 Imports: 
-    dplyr,
-    magrittr,
-    purrr,
-    tidyr
+    dplyr (>= 0.7.7),
+    magrittr (>= 1.5),
+    purrr (>= 0.2.5),
+    tidyr (>= 0.8.2)
 Suggests: 
-    covr,
-    ggplot2,
-    knitr,
-    plotly,
-    rmarkdown,
-    spelling,
+    covr (>= 3.2.1),
+    ggplot2 (>= 3.1.0),
+    knitr (>= 1.20),
+    plotly (>= 4.8.0.9000),
+    rmarkdown (>= 1.10),
+    spelling (>= 1.2),
     survival,
-    testthat
+    testthat (>= 2.0.1)
 VignetteBuilder: 
     knitr
 Encoding: UTF-8

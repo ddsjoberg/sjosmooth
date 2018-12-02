@@ -1,7 +1,7 @@
 context("test-sm_predict")
 
 test_that("sm_predict creates output without error/warning: glm", {
-  glm_ex =
+  glm_ex <-
     sm_predict(
       data = mtcars,
       method = "glm",
@@ -16,7 +16,7 @@ test_that("sm_predict creates output without error/warning: glm", {
 
 test_that("sm_predict creates output without error/warning: coxph", {
   library(survival)
-  coxph_ex =
+  coxph_ex <-
     sm_predict(
       data = lung,
       method = "coxph",
