@@ -102,7 +102,7 @@ sm_predict_ex2 %>%
   geom_histogram(bins = 25) +
   labs(
     title = "Difference Distribution",
-    x = "Difference in estimated survival and true survival"
+    x = "Difference in estimated and true survival"
   )
 
 # Plotting the true survival probabilities
