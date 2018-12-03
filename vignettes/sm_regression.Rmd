@@ -20,9 +20,34 @@ knitr::opts_chunk$set(
 
 The `sm_regression()` function performs kernel weighted regression.  After the the model is specified (`data = cancertx, method = "coxph", formula = Surv(time) ~ age`), an ancillary variable is specified (`weighting_var = "marker"`) and the model is estimated weighted on this variable.
 
+The following examples focus on time-to-event endpoints.  The example data set is simulated from a Cox regression model.
+
+$$
+h(t) = h_0(t)e^{\textbf{X}\beta}
+$$
+
+with $h_0(t) = 1$ and $\textbf{X}\beta = 0.02 * age - 0.2 * marker$.  The independent variables age and marker are independent from one another.  The example data set containts the following columns: 
+
+    time    Years from cancer treatment to death
+    age     Age at treatment
+    marker  Marker level at treatment
+    survt1  True 1 year survival probability
+
+```{r dta, message=FALSE}
+library(sjosmooth)
+library(dplyr)
+# loading data from sjosmooth github page
+load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"))
+
+cancertx %>% select(time, age, marker, survt1) %>% head()
+```
+
+The simualted data contains `r nrow(cancertx) %>% format(big.mark = ",", scientific=FALSE)` observations.
+
+
 ## Example 
 
-The function can be computationally intense on large data sets.  The following code was run to get the example object `sm_regression_ex`.
+Kernel smoothing can be computationally intense on large data sets.  The following code was run to get the example object `sm_regression_ex1` and the results saved to  [GitHub](https://github.com/ddsjoberg/sjosmooth/tree/master/examples).
 
 ```
 library(survival)
@@ -48,12 +73,9 @@ In the model age and marker level are independent, and therefore, the univariate
 The beta coefficient is the same across all marker levels.  In the figure below, the solid black line is the estimates beta coefficient (with 95% CI), and the dashed line is the true value. 
 
 ```{r remedy001, messages = F}
-library(sjosmooth)
-library(survival)
-library(dplyr)
 library(ggplot2)
-# loading data and example results from sjosmooth github page
-load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"))
+library(survival)
+# loading example results from sjosmooth github page
 load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"))
 
 # plotting regression model coefficient by marker level
@@ -72,6 +94,6 @@ ggplot(plot_data, aes(x = marker, y = age.coef)) +
   geom_hline(aes(yintercept = 0.02), linetype = "dashed") +
   scale_y_continuous(limits = c(0, 0.04)) +
   labs(
-    y = "beta "
+    y = "slope for age regressed on time to death"
   )
 ```
