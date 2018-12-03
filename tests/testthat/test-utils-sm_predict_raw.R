@@ -15,7 +15,7 @@ test_that("utils-sm_predict_raw creates output without error/warning: glm", {
 
 test_that("utils-sm_predict_raw creates output without error/warning: coxph", {
   library(survival)
-  glm_ex <-
+  coxph_ex <-
     sm_predict_raw(
       method = "coxph",
       object = coxph(Surv(time, status) ~ age, lung),
@@ -23,8 +23,8 @@ test_that("utils-sm_predict_raw creates output without error/warning: coxph", {
       type = "failure"
     )
 
-  expect_error(glm_ex, NA)
-  expect_warning(glm_ex, NA)
+  expect_error(coxph_ex, NA)
+  expect_warning(coxph_ex, NA)
 })
 
 

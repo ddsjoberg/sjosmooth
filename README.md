@@ -10,8 +10,8 @@ status](https://codecov.io/gh/ddsjoberg/sjosmooth/branch/master/graph/badge.svg)
 
 # sjosmooth <img src="man/figures/logo.png" align="right" height=140/>
 
-The goal of sjosmooth is to provide kernel smoothed estimates for time
-to event data.
+The goal of **sjosmooth** is to provide kernel smoothed estimates for
+time to event data.
 
 ## Installation
 
