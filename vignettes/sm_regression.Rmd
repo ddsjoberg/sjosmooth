@@ -39,7 +39,7 @@ library(dplyr)
 # loading data from sjosmooth github page
 load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"))
 
-cancertx %>% select(time, age, marker, survt1) %>% head()
+cancertx %>% select(time, age, marker, survt1) %>% head() %>% knitr::kable()
 ```
 
 The simualted data contains `r nrow(cancertx) %>% format(big.mark = ",", scientific=FALSE)` observations.

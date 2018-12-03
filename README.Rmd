@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 [![Travis build status](https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master)](https://travis-ci.org/ddsjoberg/sjosmooth)
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/ddsjoberg/sjosmooth?branch=master&svg=true)](https://ci.appveyor.com/project/ddsjoberg/sjosmooth)
 [![Coverage status](https://codecov.io/gh/ddsjoberg/sjosmooth/branch/master/graph/badge.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master)
+[![CRAN status](https://www.r-pkg.org/badges/version/sjosmooth)](https://cran.r-project.org/package=sjosmooth)
 
 # sjosmooth <img src="man/figures/logo.png" align="right" height=140/>
 
@@ -35,5 +36,5 @@ The **sjosmooth** package has two primary functions.  The first calculates kerne
 
 The second function (`sm_predict`) calculates kernel-weighted predictions from regression models (i.e. outcomes that can be calculated from the `predict` function).
 
-The package was written generally, such that any regression model should be compatible.  However, only `survival::coxph()`, and `survival::survreg()`, `lm()`, and `glm()` models were tested.
+The package was written generally, such that any regression model should be compatible.  However, only `survival::coxph()`, and `survival::survreg()`, `stats::lm()`, and `stats::glm()` models were tested.
 

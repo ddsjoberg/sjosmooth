@@ -99,11 +99,73 @@
 <h2 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>The <code><a href="../reference/sm_regression.html">sm_regression()</a></code> function performs kernel weighted regression. After the the model is specified (<code>data = cancertx, method = "coxph", formula = Surv(time) ~ age</code>), an ancillary variable is specified (<code>weighting_var = "marker"</code>) and the model is estimated weighted on this variable.</p>
+<p>The following examples focus on time-to-event endpoints. The example data set is simulated from a Cox regression model.</p>
+<p><span class="math display">\[
+h(t) = h_0(t)e^{\textbf{X}\beta}
+\]</span></p>
+<p>with <span class="math inline">\(h_0(t) = 1\)</span> and <span class="math inline">\(\textbf{X}\beta = 0.02 * age - 0.2 * marker\)</span>. The independent variables age and marker are independent from one another. The example data set containts the following columns:</p>
+<pre><code>time    Years from cancer treatment to death
+age     Age at treatment
+marker  Marker level at treatment
+survt1  True 1 year survival probability</code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(sjosmooth)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="co"># loading data from sjosmooth github page</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"</span>))</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">cancertx <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(time, age, marker, survt1) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>() <span class="op">%&gt;%</span><span class="st"> </span>knitr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/knitr/topics/kable">kable</a></span>()</a></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="right">time</th>
+<th align="right">age</th>
+<th align="right">marker</th>
+<th align="right">survt1</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">4.396865</td>
+<td align="right">12.79050</td>
+<td align="right">10.052925</td>
+<td align="right">0.8411829</td>
+</tr>
+<tr class="even">
+<td align="right">1.761713</td>
+<td align="right">32.70496</td>
+<td align="right">8.164047</td>
+<td align="right">0.6867428</td>
+</tr>
+<tr class="odd">
+<td align="right">4.401422</td>
+<td align="right">23.16842</td>
+<td align="right">8.725925</td>
+<td align="right">0.7576508</td>
+</tr>
+<tr class="even">
+<td align="right">1.027328</td>
+<td align="right">30.00945</td>
+<td align="right">12.923154</td>
+<td align="right">0.8715716</td>
+</tr>
+<tr class="odd">
+<td align="right">1.979813</td>
+<td align="right">31.51574</td>
+<td align="right">9.909102</td>
+<td align="right">0.7719386</td>
+</tr>
+<tr class="even">
+<td align="right">2.009533</td>
+<td align="right">38.03416</td>
+<td align="right">7.372298</td>
+<td align="right">0.6127544</td>
+</tr>
+</tbody>
+</table>
+<p>The simualted data contains 10,000 observations.</p>
 </div>
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h2>
-<p>The function can be computationally intense on large data sets. The following code was run to get the example object <code>sm_regression_ex</code>.</p>
+<p>Kernel smoothing can be computationally intense on large data sets. The following code was run to get the example object <code>sm_regression_ex1</code> and the results saved to <a href="https://github.com/ddsjoberg/sjosmooth/tree/master/examples">GitHub</a>.</p>
 <pre><code>library(survival)
 library(sjosmooth)
 sm_regression_ex =
@@ -120,40 +182,29 @@ sm_regression_ex =
 \]</span></p>
 <p>In the model age and marker level are independent, and therefore, the univariate model the slope coefficient for age remains <span class="math inline">\(\beta_{age} = 0.02\)</span></p>
 <p>The beta coefficient is the same across all marker levels. In the figure below, the solid black line is the estimates beta coefficient (with 95% CI), and the dashed line is the true value.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">library</span>(sjosmooth)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">library</span>(survival)</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="co">#&gt; Attaching package: 'dplyr'</span></a>
-<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="co">#&gt; The following objects are masked from 'package:stats':</span></a>
-<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="co">#&gt;     filter, lag</span></a>
-<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="co">#&gt; The following objects are masked from 'package:base':</span></a>
-<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co">#&gt;     intersect, setdiff, setequal, union</span></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="kw">library</span>(ggplot2)</a>
-<a class="sourceLine" id="cb2-13" data-line-number="13"><span class="co"># loading data and example results from sjosmooth github page</span></a>
-<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"</span>))</a>
-<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"</span>))</a>
-<a class="sourceLine" id="cb2-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb2-17" data-line-number="17"><span class="co"># plotting regression model coefficient by marker level</span></a>
-<a class="sourceLine" id="cb2-18" data-line-number="18">plot_data =</a>
-<a class="sourceLine" id="cb2-19" data-line-number="19"><span class="st">  </span>sm_regression_ex1 <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-20" data-line-number="20"><span class="st">  </span><span class="kw">mutate</span>(</a>
-<a class="sourceLine" id="cb2-21" data-line-number="21">    <span class="dt">age.coef =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(model_obj, <span class="op">~</span><span class="kw">coef</span>(.x)),</a>
-<a class="sourceLine" id="cb2-22" data-line-number="22">    <span class="dt">age.ci =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map</a></span>(model_obj, <span class="op">~</span><span class="kw">confint</span>(.x) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as_data_frame</span>())</a>
-<a class="sourceLine" id="cb2-23" data-line-number="23">  ) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-24" data-line-number="24"><span class="st">  </span><span class="kw">select</span>(newdata, age.coef, age.ci) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-25" data-line-number="25"><span class="st">  </span>tidyr<span class="op">::</span><span class="kw"><a href="https://tidyr.tidyverse.org/reference/unnest.html">unnest</a></span>(age.ci, newdata)</a>
-<a class="sourceLine" id="cb2-26" data-line-number="26"></a>
-<a class="sourceLine" id="cb2-27" data-line-number="27"><span class="kw">ggplot</span>(plot_data, <span class="kw">aes</span>(<span class="dt">x =</span> marker, <span class="dt">y =</span> age.coef)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-28" data-line-number="28"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-29" data-line-number="29"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> <span class="st">`</span><span class="dt">2.5 %</span><span class="st">`</span>, <span class="dt">ymax =</span> <span class="st">`</span><span class="dt">97.5 %</span><span class="st">`</span>), <span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-30" data-line-number="30"><span class="st">  </span><span class="kw">geom_hline</span>(<span class="kw">aes</span>(<span class="dt">yintercept =</span> <span class="fl">0.02</span>), <span class="dt">linetype =</span> <span class="st">"dashed"</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-31" data-line-number="31"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.04</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-32" data-line-number="32"><span class="st">  </span><span class="kw">labs</span>(</a>
-<a class="sourceLine" id="cb2-33" data-line-number="33">    <span class="dt">y =</span> <span class="st">"beta "</span></a>
-<a class="sourceLine" id="cb2-34" data-line-number="34">  )</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">library</span>(ggplot2)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">library</span>(survival)</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co"># loading example results from sjosmooth github page</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="kw">load</span>(<span class="kw">url</span>(<span class="st">"https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_regression_ex1.rda?raw=true"</span>))</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="co"># plotting regression model coefficient by marker level</span></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">plot_data =</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="st">  </span>sm_regression_ex1 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="st">  </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">    <span class="dt">age.coef =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(model_obj, <span class="op">~</span><span class="kw">coef</span>(.x)),</a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">    <span class="dt">age.ci =</span> purrr<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map</a></span>(model_obj, <span class="op">~</span><span class="kw">confint</span>(.x) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">as_data_frame</span>())</a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">  ) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-13" data-line-number="13"><span class="st">  </span><span class="kw">select</span>(newdata, age.coef, age.ci) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-14" data-line-number="14"><span class="st">  </span>tidyr<span class="op">::</span><span class="kw"><a href="https://tidyr.tidyverse.org/reference/unnest.html">unnest</a></span>(age.ci, newdata)</a>
+<a class="sourceLine" id="cb4-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb4-16" data-line-number="16"><span class="kw">ggplot</span>(plot_data, <span class="kw">aes</span>(<span class="dt">x =</span> marker, <span class="dt">y =</span> age.coef)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-17" data-line-number="17"><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-18" data-line-number="18"><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> <span class="st">`</span><span class="dt">2.5 %</span><span class="st">`</span>, <span class="dt">ymax =</span> <span class="st">`</span><span class="dt">97.5 %</span><span class="st">`</span>), <span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-19" data-line-number="19"><span class="st">  </span><span class="kw">geom_hline</span>(<span class="kw">aes</span>(<span class="dt">yintercept =</span> <span class="fl">0.02</span>), <span class="dt">linetype =</span> <span class="st">"dashed"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-20" data-line-number="20"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">limits =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="fl">0.04</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-21" data-line-number="21"><span class="st">  </span><span class="kw">labs</span>(</a>
+<a class="sourceLine" id="cb4-22" data-line-number="22">    <span class="dt">y =</span> <span class="st">"slope for age regressed on time to death"</span></a>
+<a class="sourceLine" id="cb4-23" data-line-number="23">  )</a></code></pre></div>
 <p><img src="sm_regression_files/figure-html/remedy001-1.png" width="700"></p>
 </div>
   </div>
