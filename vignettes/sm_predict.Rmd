@@ -18,11 +18,33 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The `sm_predict()` function calculates kernel-smoothed predictions from regression models (i.e. outputs from the `predict()` function).  The following examples focus on time-to-event endpoints.
+The `sm_predict()` function calculates kernel-smoothed predictions from regression models (i.e. outputs from the `predict()` function).  The following examples focus on time-to-event endpoints.  The example data set is simulated from a Cox regression model.
+
+$$
+h(t) = h_0(t)e^{\textbf{X}\beta}
+$$
+
+with $h_0(t) = 1$ and $\textbf{X}\beta = 0.02 * age - 0.2 * marker$.  The independent variables age and marker are independent from one another.  The example data set containts the following columns: 
+
+    time    Years from cancer treatment to death
+    age     Age at treatment
+    marker  Marker level at treatment
+    survt1  True 1 year survival probability
+
+```{r dta, message=FALSE}
+library(sjosmooth)
+library(dplyr)
+# loading data from sjosmooth github page
+load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"))
+
+cancertx %>% select(time, age, marker, survt1) %>% head() %>% knitr::kable()
+```
+
+The simualted data contains `r nrow(cancertx) %>% format(big.mark = ",", scientific=FALSE)` observations.
 
 ## Example 1 - Univariate
 
-The function can be computationally intense on large data sets.  The following code was run to get the example object `sm_regression_ex`.
+Kernel smoothing can be computationally intense on large data sets.  The following code was run to get the example object `sm_regression_ex1` and the results saved to  [GitHub](https://github.com/ddsjoberg/sjosmooth/tree/master/examples).
 
 ```
 library(survival)
@@ -47,12 +69,8 @@ $$
 In the model age and marker level are independent, and therefore, the univariate model the slope coefficient for marker remains $\beta_{marker} = -0.2$ 
 
 ```{r remedy001}
-library(sjosmooth)
-library(survival)
-library(dplyr)
 library(ggplot2)
 # loading data and example results from sjosmooth github page
-load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/cancertx.rda?raw=true"))
 load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_predict_ex1.rda?raw=true"))
 
 ggplot(sm_predict_ex1, aes(x = marker, y = .fitted)) +
@@ -62,6 +80,9 @@ ggplot(sm_predict_ex1, aes(x = marker, y = .fitted)) +
     data = cancertx %>% filter(marker >= 5 & marker <= 15),
     aes(x = marker, y = survt1_marker),
     linetype = "dashed"
+  ) +
+  labs(
+    y = "1 year survival probability"
   )
 ```
 
@@ -69,24 +90,30 @@ The dashed line is the true one year survival, and the solid line is the estimat
 
 ## Example 2 - Multivariable
 
+In this example, the 1 year survival will be estimated by both age and marker level.  The following code was run in advance, and the results saved to [GitHub](https://github.com/ddsjoberg/sjosmooth/tree/master/examples).
+
+```
+sm_predict_ex2 <-
+  sjosmooth::sm_predict(
+    data = cancertx,
+    method = "coxph",
+    formula = Surv(time) ~ marker + age,
+    newdata =
+      list(
+        marker = seq(7, 13, 1),
+        age = seq(20, 40, 2)
+      ) %>%
+        purrr::cross_df() %>%
+        dplyr::mutate(time = 1),
+    type = "survival",
+    verbose = TRUE
+  )
+```
+
 ```{r remedy002}
 library(plotly)
+# loading example results
 load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_predict_ex2.rda?raw=true"))
-
-# extracting unique values of independent variables
-age.seq =
-  sm_predict_ex2 %>%
-  select(age) %>%
-  distinct() %>%
-  arrange(age) %>%
-  pull()
-
-marker.seq =
-  sm_predict_ex2 %>%
-  select(marker) %>%
-  distinct() %>%
-  arrange(marker) %>%
-  pull()
 
 # adding true risk to dataset, and calculating difference between estiamted and true rate
 sm_predict_ex2 = 
@@ -105,6 +132,21 @@ sm_predict_ex2 %>%
     x = "Difference in estimated and true survival"
   )
 
+# extracting unique values of independent variables
+age.seq =
+  sm_predict_ex2 %>%
+  select(age) %>%
+  distinct() %>%
+  arrange(age) %>%
+  pull()
+
+marker.seq =
+  sm_predict_ex2 %>%
+  select(marker) %>%
+  distinct() %>%
+  arrange(marker) %>%
+  pull()
+
 # Plotting the true survival probabilities
 sm_predict_ex2 %>%
   select(marker, age, survt1) %>%
@@ -119,7 +161,7 @@ sm_predict_ex2 %>%
     scene = list(
       xaxis = list(title = "Marker"),
       yaxis = list(title = "Age"),
-      zaxis = list(title = "Risk")
+      zaxis = list(title = "Survival Prob.")
     ))
 
 # Plotting the estimated survival probabilities from sm_predict()
@@ -136,6 +178,6 @@ sm_predict_ex2 %>%
     scene = list(
       xaxis = list(title = "Marker"),
       yaxis = list(title = "Age"),
-      zaxis = list(title = "Risk")
+      zaxis = list(title = "Survival Prob.")
     ))
 ```

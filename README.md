@@ -7,11 +7,13 @@ status](https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master)](https://tr
 status](https://ci.appveyor.com/api/projects/status/github/ddsjoberg/sjosmooth?branch=master&svg=true)](https://ci.appveyor.com/project/ddsjoberg/sjosmooth)
 [![Coverage
 status](https://codecov.io/gh/ddsjoberg/sjosmooth/branch/master/graph/badge.svg)](https://codecov.io/github/ddsjoberg/sjosmooth?branch=master)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/sjosmooth)](https://cran.r-project.org/package=sjosmooth)
 
 # sjosmooth <img src="man/figures/logo.png" align="right" height=140/>
 
-The goal of sjosmooth is to provide kernel smoothed estimates for time
-to event data.
+The goal of **sjosmooth** is to provide kernel smoothed estimates for
+time to event data.
 
 ## Installation
 
@@ -35,4 +37,5 @@ from the `predict` function).
 
 The package was written generally, such that any regression model should
 be compatible. However, only `survival::coxph()`, and
-`survival::survreg()`, `lm()`, and `glm()` models were tested.
+`survival::survreg()`, `stats::lm()`, and `stats::glm()` models were
+tested.

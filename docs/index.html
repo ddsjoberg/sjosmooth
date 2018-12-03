@@ -95,7 +95,7 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#sjosmooth" class="anchor"></a>sjosmooth <img src="reference/figures/logo.png" align="right" height="140/">
 </h1></div>
-<p>The goal of sjosmooth is to provide kernel smoothed estimates for time to event data.</p>
+<p>The goal of <strong>sjosmooth</strong> is to provide kernel smoothed estimates for time to event data.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
@@ -107,7 +107,7 @@
 <a href="#functions" class="anchor"></a>Functions</h2>
 <p>The <strong>sjosmooth</strong> package has two primary functions. The first calculates kernel-weighted regression models (<code>sm_regression</code>). The user specifies a regression model and a variable for weighting, and <code>sm_regression</code> will estimate a weighted regression model for each unique value of the specified variable.</p>
 <p>The second function (<code>sm_predict</code>) calculates kernel-weighted predictions from regression models (i.e. outcomes that can be calculated from the <code>predict</code> function).</p>
-<p>The package was written generally, such that any regression model should be compatible. However, only <code><a href="http://www.rdocumentation.org/packages/survival/topics/coxph">survival::coxph()</a></code>, and <code><a href="http://www.rdocumentation.org/packages/survival/topics/survreg">survival::survreg()</a></code>, <code>lm()</code>, and <code>glm()</code> models were tested.</p>
+<p>The package was written generally, such that any regression model should be compatible. However, only <code><a href="http://www.rdocumentation.org/packages/survival/topics/coxph">survival::coxph()</a></code>, and <code><a href="http://www.rdocumentation.org/packages/survival/topics/survreg">survival::survreg()</a></code>, <code><a href="http://www.rdocumentation.org/packages/stats/topics/lm">stats::lm()</a></code>, and <code><a href="http://www.rdocumentation.org/packages/stats/topics/glm">stats::glm()</a></code> models were tested.</p>
 </div>
 </div>
   </div>
@@ -140,6 +140,7 @@
 <li><a href="https://travis-ci.org/ddsjoberg/sjosmooth"><img src="https://travis-ci.org/ddsjoberg/sjosmooth.svg?branch=master" alt="Travis build status"></a></li>
 <li><a href="https://ci.appveyor.com/project/ddsjoberg/sjosmooth"><img src="https://ci.appveyor.com/api/projects/status/github/ddsjoberg/sjosmooth?branch=master&amp;svg=true" alt="AppVeyor build status"></a></li>
 <li><a href="https://codecov.io/github/ddsjoberg/sjosmooth?branch=master"><img src="https://codecov.io/gh/ddsjoberg/sjosmooth/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
+<li><a href="https://cran.r-project.org/package=sjosmooth"><img src="https://www.r-pkg.org/badges/version/sjosmooth" alt="CRAN status"></a></li>
 </ul>
 </div>
 </div>
