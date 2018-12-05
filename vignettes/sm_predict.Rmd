@@ -111,7 +111,6 @@ sm_predict_ex2 <-
 ```
 
 ```{r remedy002}
-library(plotly)
 # loading example results
 load(url("https://github.com/ddsjoberg/sjosmooth/blob/master/examples/sm_predict_ex2.rda?raw=true"))
 
@@ -132,52 +131,59 @@ sm_predict_ex2 %>%
     x = "Difference in estimated and true survival"
   )
 
-# extracting unique values of independent variables
-age.seq =
-  sm_predict_ex2 %>%
-  select(age) %>%
-  distinct() %>%
-  arrange(age) %>%
-  pull()
 
-marker.seq =
-  sm_predict_ex2 %>%
-  select(marker) %>%
-  distinct() %>%
-  arrange(marker) %>%
-  pull()
+```
+ 
+The code below will create a 3-D surface plot.  The resulting HTML-widgets figures are too large to include in the package, however.
 
-# Plotting the true survival probabilities
-sm_predict_ex2 %>%
-  select(marker, age, survt1) %>%
-  tidyr::spread(age, survt1) %>%
-  select(-marker) %>%
-  plot_ly(z = ~ as.matrix(.),
-          x = marker.seq,
-          y = age.seq) %>%
-  add_surface(showscale=FALSE) %>%
-  layout(
-    title = "True Risk of Death within 1 Year",
-    scene = list(
-      xaxis = list(title = "Marker"),
-      yaxis = list(title = "Age"),
-      zaxis = list(title = "Survival Prob.")
-    ))
-
-# Plotting the estimated survival probabilities from sm_predict()
-sm_predict_ex2 %>%
-  select(marker, age, .fitted) %>%
-  tidyr::spread(age, .fitted) %>%
-  select(-marker) %>%
-  plot_ly(z = ~ as.matrix(.),
-          x = marker.seq,
-          y = age.seq) %>%
-  add_surface(showscale=FALSE) %>%
-  layout(
-    title = "Estimated Risk of Death within 1 Year",
-    scene = list(
-      xaxis = list(title = "Marker"),
-      yaxis = list(title = "Age"),
-      zaxis = list(title = "Survival Prob.")
-    ))
+```{r}
+# library(plotly)
+# # extracting unique values of independent variables
+# age.seq =
+#   sm_predict_ex2 %>%
+#   select(age) %>%
+#   distinct() %>%
+#   arrange(age) %>%
+#   pull()
+# 
+# marker.seq =
+#   sm_predict_ex2 %>%
+#   select(marker) %>%
+#   distinct() %>%
+#   arrange(marker) %>%
+#   pull()
+# 
+# # Plotting the true survival probabilities
+# sm_predict_ex2 %>%
+#   select(marker, age, survt1) %>%
+#   tidyr::spread(age, survt1) %>%
+#   select(-marker) %>%
+#   plot_ly(z = ~ as.matrix(.),
+#           x = marker.seq,
+#           y = age.seq) %>%
+#   add_surface(showscale=FALSE) %>%
+#   layout(
+#     title = "True Risk of Death within 1 Year",
+#     scene = list(
+#       xaxis = list(title = "Marker"),
+#       yaxis = list(title = "Age"),
+#       zaxis = list(title = "Survival Prob.")
+#     ))
+# 
+# # Plotting the estimated survival probabilities from sm_predict()
+# sm_predict_ex2 %>%
+#   select(marker, age, .fitted) %>%
+#   tidyr::spread(age, .fitted) %>%
+#   select(-marker) %>%
+#   plot_ly(z = ~ as.matrix(.),
+#           x = marker.seq,
+#           y = age.seq) %>%
+#   add_surface(showscale=FALSE) %>%
+#   layout(
+#     title = "Estimated Risk of Death within 1 Year",
+#     scene = list(
+#       xaxis = list(title = "Marker"),
+#       yaxis = list(title = "Age"),
+#       zaxis = list(title = "Survival Prob.")
+#     ))
 ```
