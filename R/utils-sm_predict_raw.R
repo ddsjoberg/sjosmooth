@@ -59,7 +59,7 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
       )
 
     # if type failure, then 1 minus survival prob
-    if (type == "failure") {
+    if (type2 == "failure") {
       prediction <-
         prediction %>%
         dplyr::mutate_at(
