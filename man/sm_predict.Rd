@@ -32,7 +32,7 @@ The standard deviation for the Gaussian kernel}
 \item{dist.method}{Specifies the distance measure to be used in the kernel.
 Default is `euclidean`. Distance measures accepted by}
 
-\item{verbose}{Return full set of results. Default is `FALSE`}
+\item{verbose}{Return full set of results as an attribute. Default is `FALSE`}
 }
 \description{
 Calculates kernel-weighted predictions from regression models

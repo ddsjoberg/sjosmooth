@@ -17,7 +17,7 @@
 #' `gaussian`, and `flat` are accepted. Default is `epanechnikov`
 #' @param dist.method Specifies the distance measure to be used in the kernel.
 #' Default is `euclidean`. Distance measures accepted by
-#' @param verbose Return full set of results. Default is `FALSE`
+#' @param verbose Return full set of results as an attribute. Default is `FALSE`
 #' @export
 #' @examples
 #' sm_predict(
@@ -38,8 +38,10 @@ sm_predict <- function(data, method, formula, type, newdata = data,
       data = data, method = method, formula = formula,
       weighting_var = all.vars(formula[-2]), # vars on RHS of ~
       newdata = newdata, method.args = method.args,
-      kernel = kernel, dist.method = dist.method, lambda = lambda
-    )
+      kernel = kernel, dist.method = dist.method, lambda = lambda,
+      verbose = TRUE
+    ) %>%
+    attr(which = "wt_models") # returning full set of results
 
   # PREDICTIONS ----------------------------------------------------------------
   wt_models <-
