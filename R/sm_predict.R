@@ -41,14 +41,14 @@ sm_predict <- function(data, method, formula, type, newdata = data,
       kernel = kernel, dist.method = dist.method, lambda = lambda,
       verbose = TRUE
     ) %>%
-    attr(which = "wt_models") # returning full set of results
+    attr(which = "full_results") # returning full set of results
 
   # PREDICTIONS ----------------------------------------------------------------
   wt_models <-
     wt_models %>%
     dplyr::mutate_(
       predict_safely = ~purrr::map2(
-        model_obj, newdata,
+        .model, newdata,
         ~sm_predict_raw_safely(
           method = method, object = .x, newdata = .y,
           type = type, conf.level = 0.95
@@ -61,6 +61,17 @@ sm_predict <- function(data, method, formula, type, newdata = data,
       # extracting result and storing in vector
       predict_result = ~purrr::map(predict_safely, ~.x[["result"]][["result"]])
     )
+
+  # printing errors/warnings/messages from model builds
+  if (purrr::map_lgl(wt_models$predict_message, ~ length(.x) > 0) %>% any()) {
+    message_print(wt_models, "predict_message", paste0("Message in ", method, " predict():"))
+  }
+  if (purrr::map_lgl(wt_models$predict_warning, ~ length(.x) > 0) %>% any()) {
+    message_print(wt_models, "predict_warning", paste0("Warning in ", method, " predict():"))
+  }
+  if (purrr::map_lgl(wt_models$predict_error, ~ !is.null(.x)) %>% any()) {
+    message_print(wt_models, "predict_error", paste0("Error in ", method, " predict():"))
+  }
 
   # RETURN ---------------------------------------------------------------------
   # getting names of variables in newname for merging
@@ -80,7 +91,7 @@ sm_predict <- function(data, method, formula, type, newdata = data,
   # adding sm_predict attributes
   attr(sm_predict$.fitted, "type") <- type
   if (verbose == TRUE) {
-    attr(sm_predict, "wt_models") <- wt_models
+    attr(sm_predict, "full_results") <- wt_models
   }
 
   sm_predict

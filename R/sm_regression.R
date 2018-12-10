@@ -102,30 +102,33 @@ sm_regression <- function(data, method, formula, weighting_var, newdata = data,
         model_error = ~purrr::map(model_safely, ~.x[["error"]]),
         model_warning = ~purrr::map(model_safely, ~.x[["result"]][["warnings"]]),
         model_message = ~purrr::map(model_safely, ~.x[["result"]][["messages"]]),
-        model_obj = ~purrr::map(model_safely, ~.x[["result"]][["result"]])
+        .model = ~purrr::map(model_safely, ~.x[["result"]][["result"]])
       )
 
   # printing errors/warnings/messages from model builds
-  if (purrr::map_lgl(results_full$model_error, ~ !is.null(.x)) %>% any()) {
-    message_print(results_full, "model_error", paste0("Error in ", method, ":"))
+  if (purrr::map_lgl(results_full$model_message, ~ length(.x) > 0) %>% any()) {
+    message_print(results_full, "model_message", paste0("Message in ", method, ":"))
   }
   if (purrr::map_lgl(results_full$model_warning, ~ length(.x) > 0) %>% any()) {
     message_print(results_full, "model_warning", paste0("Warning in ", method, ":"))
   }
-  if (purrr::map_lgl(results_full$model_message, ~ length(.x) > 0) %>% any()) {
-    message_print(results_full, "model_message", paste0("Message in ", method, ":"))
+  if (purrr::map_lgl(results_full$model_error, ~ !is.null(.x)) %>% any()) {
+    message_print(results_full, "model_error", paste0("Error in ", method, ":"))
   }
 
+
+  # only keeping newdata and model
   results <-
     results_full %>%
-    dplyr::select(c("newdata", "model_obj")) %>%
+    dplyr::select(c("newdata", ".model")) %>%
     tidyr::unnest_("newdata") %>%
     # moving model_obj to the end of data frame
-    dplyr::select(-c("model_obj"), ("model_obj"))
+    dplyr::select(-c(".model"), (".model")) %>%
+    dplyr::filter_(~purrr::map_lgl(.model, ~!is.null(.x)))
 
   # adding full results if requested
   if (verbose == TRUE) {
-    attr(results, "wt_models") <- results_full
+    attr(results, "full_results") <- results_full
   }
 
   return(results)

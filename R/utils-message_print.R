@@ -11,6 +11,7 @@
 
 message_print <- function(data, message_col, preamble) {
 
+  # converting errors to character columns
   x <- data[c("newdata", message_col)]
   x[["..message_chr.."]] <- purrr::map_chr(
     x[[message_col]],
@@ -21,6 +22,7 @@ message_print <- function(data, message_col, preamble) {
     )
   )
 
+  # one element per unique error
   message_unique <-
     x$..message_chr.. %>%
     stats::na.omit() %>%
@@ -28,18 +30,17 @@ message_print <- function(data, message_col, preamble) {
 
 
   # if no message end function
-  if(length(message_unique) == 0) stop()
+  if(length(message_unique) == 0) return(NULL)
 
   # printing messages and data
   for (m in message_unique) {
     message(paste(preamble, m))
 
-    print(
-      x %>%
-        dplyr::filter(~..message_chr.. == m) %>%
-        dplyr::select("newdata") %>%
-        tidyr::unnest_("newdata")
-    )
+    x %>%
+      dplyr::filter_(~..message_chr.. == m) %>%
+      dplyr::select("newdata") %>%
+      tidyr::unnest_("newdata") %>%
+      print(., n = nrow(.))
 
   }
 }
