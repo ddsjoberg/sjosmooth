@@ -33,6 +33,10 @@ sm_regression <- function(data, method, formula, weighting_var, newdata = data,
                           method.args = NULL, lambda = 1, kernel = "epanechnikov",
                           dist.method = "euclidean", verbose = FALSE) {
 
+  # will return call, and all object passed to in fmt_table1 call
+  # the object func_inputs is a list of every object passed to the function
+  sm_regression_inputs <- as.list(environment())
+
   # all variables
   all_vars <- c(all.vars(formula), weighting_var) %>% unique()
 
@@ -126,12 +130,16 @@ sm_regression <- function(data, method, formula, weighting_var, newdata = data,
     dplyr::select(-c(".model"), (".model")) %>%
     dplyr::filter_(~purrr::map_lgl(.model, ~!is.null(.x)))
 
-  # adding full results if requested
+  # returning additional information
   if (verbose == TRUE) {
     attr(results, "full_results") <- results_full
   }
+  attr(results, "sm_regression_inputs") <- sm_regression_inputs
 
-  return(results)
+  # assigning class
+  class(results) <- c("sm_regression", class(results))
+
+  results
 }
 
 # sm_regression(
