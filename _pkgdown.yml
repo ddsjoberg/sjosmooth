@@ -28,3 +28,5 @@ reference:
     contents:
       - sm_predict
       - sm_regression
+      - add_ci
+      - add_ci.sm_regression

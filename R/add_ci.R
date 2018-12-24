@@ -66,10 +66,8 @@ add_ci.sm_regression <- function(x, bootn = 200, ...) {
 
   result_model_nested <-
     result_all %>%
-    dplyr::select(c("..id..", ".model")) %T>%
-    {print(.)} %>%
-    tidyr::nest(".model") %T>%
-    {print(.)} %>%
+    dplyr::select(c("..id..", ".model")) %>%
+    tidyr::nest(".model") %>%
     dplyr::mutate_(
       .model.boot = ~purrr::map(
         data,

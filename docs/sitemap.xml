@@ -4,10 +4,22 @@
     <loc>http://www.danieldsjoberg.com/sjosmooth//index.html</loc>
   </url>
   <url>
+    <loc>http://www.danieldsjoberg.com/sjosmooth//reference/add_ci.html</loc>
+  </url>
+  <url>
+    <loc>http://www.danieldsjoberg.com/sjosmooth//reference/add_ci.sm_regression.html</loc>
+  </url>
+  <url>
     <loc>http://www.danieldsjoberg.com/sjosmooth//reference/calculate_dist.html</loc>
   </url>
   <url>
     <loc>http://www.danieldsjoberg.com/sjosmooth//reference/calculate_weights.html</loc>
+  </url>
+  <url>
+    <loc>http://www.danieldsjoberg.com/sjosmooth//reference/grapes-T-greater-than-grapes.html</loc>
+  </url>
+  <url>
+    <loc>http://www.danieldsjoberg.com/sjosmooth//reference/message_print.html</loc>
   </url>
   <url>
     <loc>http://www.danieldsjoberg.com/sjosmooth//reference/null-default.html</loc>
