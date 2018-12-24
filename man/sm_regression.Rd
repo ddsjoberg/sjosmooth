@@ -6,7 +6,7 @@
 \usage{
 sm_regression(data, method, formula, weighting_var, newdata = data,
   method.args = NULL, lambda = 1, kernel = "epanechnikov",
-  dist.method = "euclidean")
+  dist.method = "euclidean", verbose = FALSE)
 }
 \arguments{
 \item{data}{data frame}
@@ -31,6 +31,8 @@ The standard deviation for the Gaussian kernel}
 \item{dist.method}{Specifies the distance measure to be used in the kernel.
 Default is `euclidean`. Distance measures accepted by
 \code{stats::\link[stats]{dist}} is acceptable.}
+
+\item{verbose}{Return full set of results as an attribute. Default is `FALSE`}
 }
 \description{
 The user specifies a regression model and a variable for weighting,

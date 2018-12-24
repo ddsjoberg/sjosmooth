@@ -13,10 +13,7 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
   if (is.null(object)) {
     return(
       dplyr::data_frame(
-        .fitted = NA_real_,
-        .se.fit = NA_real_,
-        .fitted.ll = NA_real_,
-        .fitted.ul = NA_real_
+        .fitted = NA_real_
       )
     )
   }
@@ -31,44 +28,34 @@ sm_predict_raw <- function(method, object, newdata, type, conf.level = 0.95) {
   # first calculate predictions for all model types
   prediction <-
     stats::predict(
-      object = object, newdata = newdata, type = type, se.fit = TRUE
+      object = object, newdata = newdata, type = type, se.fit = FALSE
     )
-
-  # checking the returned object is what I expect
-  if (!setequal(names(prediction)[1:2], c("fit", "se.fit"))) {
-    stop('Expecting an object with names c("fit", "se.fit") from predict() function.')
-  }
 
   # converting list to tibble, and calculating CI
   prediction <-
-    prediction[c("fit", "se.fit")] %>%
+    prediction %>%
     dplyr::as_data_frame() %>%
-    purrr::set_names(c(".fitted", ".se.fit")) %>%
-    dplyr::mutate_(
-      .fitted.ll = ~.fitted + abs(qnorm((1 - conf.level) / 2)) * .se.fit,
-      .fitted.ul = ~.fitted - abs(qnorm((1 - conf.level) / 2)) * .se.fit
-    )
+    purrr::set_names(c(".fitted"))
 
   # transforming coxph survival and failure
   if (method == "coxph" & type2 %in% c("survival", "failure")) {
     prediction <-
       prediction %>%
       dplyr::mutate_at(
-        .vars = c(".fitted", ".fitted.ll", ".fitted.ul"),
+        .vars = c(".fitted"),
         .funs = dplyr::funs(exp(-.))
       )
 
     # if type failure, then 1 minus survival prob
-    if (type == "failure") {
+    if (type2 == "failure") {
       prediction <-
         prediction %>%
         dplyr::mutate_at(
-          .vars = c(".fitted", ".fitted.ll", ".fitted.ul"),
+          .vars = c(".fitted"),
           .funs = dplyr::funs(1 - .)
         )
     }
   }
-
 
   # returning results
   prediction

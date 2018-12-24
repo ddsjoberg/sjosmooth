@@ -52,7 +52,7 @@ Kernel smoothing can be computationally intense on large data sets.  The followi
 ```
 library(survival)
 library(sjosmooth)
-sm_regression_ex =
+sm_regression_ex1 =
   sm_regression(
     data = cancertx,
     method = "coxph",
