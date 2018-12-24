@@ -19,3 +19,4 @@ Prints errors/warnings/messages from the regression model function and from the
 predict function.  The function will print each unique message along with the
 data associated with the message.
 }
+\keyword{internal}

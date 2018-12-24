@@ -8,6 +8,7 @@
 #' @param message_col string with column name of message to print
 #' @param preamble character string to print before the message
 #' (e.g. 'Error from coxph:')
+#' @keywords internal
 
 message_print <- function(data, message_col, preamble) {
 
