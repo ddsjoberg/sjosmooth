@@ -14,7 +14,8 @@ add_ci <- function(x, ...) UseMethod("add_ci")
 #' This function is meant to be run after `sm_regression` and
 #' will calculate bootstraped model estimates.
 #' @param x `sm_regression` object
-#' @param bootn number of bootstrap model to run. Default is 200.
+#' @param n number of bootstrap models to run. Default is 200.
+#' @param seed a single value, interpreted as an integer. See \code{\link{set.seed}}
 #' @param ... further arguments passed to or from other methods.
 #' @export
 #' @examples
@@ -26,13 +27,65 @@ add_ci <- function(x, ...) UseMethod("add_ci")
 #'   lambda = 1,
 #'   newdata = data.frame(hp = c(150, 200))
 #' ) %>%
-#' add_ci(bootn = 50)
+#' add_ci(n = 50)
+#'
+#' # example plotting slope coefficient with confidence intervals
+#' \dontrun{
+#' library(ggplot2)
+#' mtcars %>%
+#'   # calculate locally-weighted regression models
+#'   sm_regression(
+#'     method = "lm",
+#'     formula = mpg ~ am ,
+#'     weighting_var = "hp",
+#'     newdata = data.frame(hp = seq(125, 175, by = 5))
+#'   ) %>%
+#'   # add models from bootstrap resamples
+#'   add_ci(n = 200, seed = 23948) %>%
+#'   # calculating confidence interval for beta coefficient
+#'   dplyr::mutate(
+#'     # extracting central estimate of beta
+#'     .coef = purrr::map_dbl(
+#'       .model,
+#'       ~ .x %>% coef() %>% purrr::pluck("am")
+#'     ),
+#'     # extracting each estimate of beta from bootstrapped models
+#'     .coef.boot = purrr::map(
+#'       .model.boot,
+#'       ~purrr::map_dbl(
+#'         .x,
+#'         ~ .x %>% coef() %>% purrr::pluck("am")
+#'       )
+#'     ),
+#'     # calculating the SD of the beta distribution
+#'     .coef.sd = purrr::map_dbl(
+#'       .coef.boot,
+#'       sd,
+#'       na.rm = TRUE
+#'     ),
+#'     # calculating the confidence interval for beta coef
+#'     .coef.ll = .coef - qnorm(0.975) * .coef.sd,
+#'     .coef.ul = .coef + qnorm(0.975) * .coef.sd,
+#'   ) %>%
+#'   ggplot(aes(x = hp, y = .coef)) +
+#'     geom_line() +
+#'     geom_ribbon(
+#'       aes(ymin = .coef.ll, ymax = .coef.ul),
+#'       alpha = 0.4
+#'     ) +
+#'     labs(
+#'       y = "Slope coefficient for 'am' when regressed on 'mpg'"
+#'     )
+#' }
 
-add_ci.sm_regression <- function(x, bootn = 200, ...) {
+add_ci.sm_regression <- function(x, n = 200, seed = NULL, ...) {
+
+  # setting seed if provided
+  if (!is.null(seed)) set.seed(seed)
 
   # creating resampled datasets
   data_boot <- purrr::map(
-    seq(1, bootn),
+    seq(1, n),
     ~attr(x, "sm_regression_inputs") %>%
       purrr::pluck("data") %>%
       {
