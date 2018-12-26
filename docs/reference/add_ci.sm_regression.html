@@ -133,7 +133,7 @@ will calculate bootstraped model estimates.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for sm_regression</span>
-<span class='fu'><a href='add_ci.html'>add_ci</a></span>(<span class='no'>x</span>, <span class='kw'>bootn</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='no'>...</span>)</pre>
+<span class='fu'><a href='add_ci.html'>add_ci</a></span>(<span class='no'>x</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -143,8 +143,12 @@ will calculate bootstraped model estimates.</p>
       <td><p>`sm_regression` object</p></td>
     </tr>
     <tr>
-      <th>bootn</th>
-      <td><p>number of bootstrap model to run. Default is 200.</p></td>
+      <th>n</th>
+      <td><p>number of bootstrap models to run. Default is 200.</p></td>
+    </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>a single value, interpreted as an integer. See <code><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></code></p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -162,11 +166,59 @@ will calculate bootstraped model estimates.</p>
   <span class='kw'>lambda</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>newdata</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/data.frame'>data.frame</a></span>(<span class='kw'>hp</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>150</span>, <span class='fl'>200</span>))
 ) <span class='kw'>%&gt;%</span>
-<span class='fu'><a href='add_ci.html'>add_ci</a></span>(<span class='kw'>bootn</span> <span class='kw'>=</span> <span class='fl'>50</span>)</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 2 x 3</span><span>
+<span class='fu'><a href='add_ci.html'>add_ci</a></span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>50</span>)</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 2 x 3</span><span>
 #&gt;      hp .model   .model.boot
 #&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;list&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;list&gt;</span><span>     
 #&gt; </span><span style='color: #555555;'>1</span><span>   150 </span><span style='color: #555555;'>&lt;S3: lm&gt;</span><span> </span><span style='color: #555555;'>&lt;list [50]&gt;</span><span>
-#&gt; </span><span style='color: #555555;'>2</span><span>   200 </span><span style='color: #555555;'>&lt;S3: lm&gt;</span><span> </span><span style='color: #555555;'>&lt;list [50]&gt;</span><span></div></span></pre>
+#&gt; </span><span style='color: #555555;'>2</span><span>   200 </span><span style='color: #555555;'>&lt;S3: lm&gt;</span><span> </span><span style='color: #555555;'>&lt;list [50]&gt;</span><span></div><div class='input'>
+# example plotting slope coefficient with confidence intervals
+</div></span><span class='co'># NOT RUN {</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>ggplot2</span>)
+<span class='no'>mtcars</span> <span class='kw'>%&gt;%</span>
+  <span class='co'># calculate locally-weighted regression models</span>
+  <span class='fu'><a href='sm_regression.html'>sm_regression</a></span>(
+    <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"lm"</span>,
+    <span class='kw'>formula</span> <span class='kw'>=</span> <span class='no'>mpg</span> ~ <span class='no'>am</span> ,
+    <span class='kw'>weighting_var</span> <span class='kw'>=</span> <span class='st'>"hp"</span>,
+    <span class='kw'>newdata</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/data.frame'>data.frame</a></span>(<span class='kw'>hp</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq</a></span>(<span class='fl'>125</span>, <span class='fl'>175</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>5</span>))
+  ) <span class='kw'>%&gt;%</span>
+  <span class='co'># add models from bootstrap resamples</span>
+  <span class='fu'><a href='add_ci.html'>add_ci</a></span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>23948</span>) <span class='kw'>%&gt;%</span>
+  <span class='co'># calculating confidence interval for beta coefficient</span>
+  <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(
+    <span class='co'># extracting central estimate of beta</span>
+    <span class='kw'>.coef</span> <span class='kw'>=</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span>(
+      <span class='no'>.model</span>,
+      ~ <span class='no'>.x</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>() <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/pluck.html'>pluck</a></span>(<span class='st'>"am"</span>)
+    ),
+    <span class='co'># extracting each estimate of beta from bootstrapped models</span>
+    <span class='kw'>.coef.boot</span> <span class='kw'>=</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span>(
+      <span class='no'>.model.boot</span>,
+      ~<span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span>(
+        <span class='no'>.x</span>,
+        ~ <span class='no'>.x</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>() <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/pluck.html'>pluck</a></span>(<span class='st'>"am"</span>)
+      )
+    ),
+    <span class='co'># calculating the SD of the beta distribution</span>
+    <span class='kw'>.coef.sd</span> <span class='kw'>=</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span>(
+      <span class='no'>.coef.boot</span>,
+      <span class='no'>sd</span>,
+      <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
+    ),
+    <span class='co'># calculating the confidence interval for beta coef</span>
+    <span class='kw'>.coef.ll</span> <span class='kw'>=</span> <span class='no'>.coef</span> - <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>qnorm</a></span>(<span class='fl'>0.975</span>) * <span class='no'>.coef.sd</span>,
+    <span class='kw'>.coef.ul</span> <span class='kw'>=</span> <span class='no'>.coef</span> + <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>qnorm</a></span>(<span class='fl'>0.975</span>) * <span class='no'>.coef.sd</span>,
+  ) <span class='kw'>%&gt;%</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span>(<span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='no'>hp</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='no'>.coef</span>)) +
+    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span>() +
+    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_ribbon.html'>geom_ribbon</a></span>(
+      <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span>(<span class='kw'>ymin</span> <span class='kw'>=</span> <span class='no'>.coef.ll</span>, <span class='kw'>ymax</span> <span class='kw'>=</span> <span class='no'>.coef.ul</span>),
+      <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>0.4</span>
+    ) +
+    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span>(
+      <span class='kw'>y</span> <span class='kw'>=</span> <span class='st'>"Slope coefficient for 'am' when regressed on 'mpg'"</span>
+    )
+<span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

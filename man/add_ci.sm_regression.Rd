@@ -4,12 +4,14 @@
 \alias{add_ci.sm_regression}
 \title{Add bootstrapped model estimates}
 \usage{
-\method{add_ci}{sm_regression}(x, bootn = 200, ...)
+\method{add_ci}{sm_regression}(x, n = 200, seed = NULL, ...)
 }
 \arguments{
 \item{x}{`sm_regression` object}
 
-\item{bootn}{number of bootstrap model to run. Default is 200.}
+\item{n}{number of bootstrap models to run. Default is 200.}
+
+\item{seed}{a single value, interpreted as an integer. See \code{\link{set.seed}}}
 
 \item{...}{further arguments passed to or from other methods.}
 }
@@ -26,5 +28,54 @@ sm_regression(
   lambda = 1,
   newdata = data.frame(hp = c(150, 200))
 ) \%>\%
-add_ci(bootn = 50)
+add_ci(n = 50)
+
+# example plotting slope coefficient with confidence intervals
+\dontrun{
+library(ggplot2)
+mtcars \%>\%
+  # calculate locally-weighted regression models
+  sm_regression(
+    method = "lm",
+    formula = mpg ~ am ,
+    weighting_var = "hp",
+    newdata = data.frame(hp = seq(125, 175, by = 5))
+  ) \%>\%
+  # add models from bootstrap resamples
+  add_ci(n = 200, seed = 23948) \%>\%
+  # calculating confidence interval for beta coefficient
+  dplyr::mutate(
+    # extracting central estimate of beta
+    .coef = purrr::map_dbl(
+      .model,
+      ~ .x \%>\% coef() \%>\% purrr::pluck("am")
+    ),
+    # extracting each estimate of beta from bootstrapped models
+    .coef.boot = purrr::map(
+      .model.boot,
+      ~purrr::map_dbl(
+        .x,
+        ~ .x \%>\% coef() \%>\% purrr::pluck("am")
+      )
+    ),
+    # calculating the SD of the beta distribution
+    .coef.sd = purrr::map_dbl(
+      .coef.boot,
+      sd,
+      na.rm = TRUE
+    ),
+    # calculating the confidence interval for beta coef
+    .coef.ll = .coef - qnorm(0.975) * .coef.sd,
+    .coef.ul = .coef + qnorm(0.975) * .coef.sd,
+  ) \%>\%
+  ggplot(aes(x = hp, y = .coef)) +
+    geom_line() +
+    geom_ribbon(
+      aes(ymin = .coef.ll, ymax = .coef.ul),
+      alpha = 0.4
+    ) +
+    labs(
+      y = "Slope coefficient for 'am' when regressed on 'mpg'"
+    )
+}
 }
