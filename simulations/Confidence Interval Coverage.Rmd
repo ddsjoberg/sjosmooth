@@ -1,0 +1,132 @@
+---
+title: "Confidence Interval Coverage"
+author: "Daniel Sjoberg"
+date: "December 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(sjosmooth)
+set.seed(546879)
+```
+
+## Intro
+
+Here we assess the coverage of the confidence inervals calculated from the bootstrap resampling.
+
+## Simulate Data
+
+```{r remedy001}
+# number of simulations to run
+simn = 5000
+# size of data frame
+n = 1000
+
+dta_simulated =  
+  data_frame(
+    simid = seq(1, simn),
+    # simulating datasets
+    data = map(simid,
+               ~data_frame(
+                 x = rnorm(n),
+                 y = x + rnorm(n, 0.2)
+               )
+    ),
+    .coef.all.data = map_dbl(
+      data, 
+      ~lm(y~x, .x) %>%
+        coef() %>%
+        pluck("x")
+    )
+  )
+dta_simulated
+```
+
+## Run **sjosmooth** functions
+
+```{r remedy002}
+
+results =  
+  dta_simulated %>%
+  mutate(
+    # sm_regression
+    sm_regression = 
+      map(
+        data,
+        ~.x %>%
+          sm_regression(
+            method = "lm",
+            formula = y ~ x ,
+            weighting_var = "x",
+            newdata = data.frame(x = 0)
+          )
+      ),
+    # adding bootstrapped results
+    add_ci = map(
+      sm_regression,
+      ~.x %>%
+        add_ci(n = 200)
+    )
+  )
+
+results
+```
+
+## Calculating CI
+
+```{r remedy003}
+
+results_ci = 
+  results %>%
+  unnest(add_ci) %>%
+  mutate(
+    # extracting central estimate of beta
+    .coef = purrr::map_dbl(
+      .model,
+      ~ .x %>% coef() %>% pluck("x") %||% NA_real_
+    ),
+    # extracting each estimate of beta from bootstrapped models
+    .coef.boot = map(
+      .model.boot,
+      ~map_dbl(
+        .x, 
+        ~.x %>% coef() %>% pluck("x") %||% NA_real_
+      )
+    ),
+    # calculating the SD of the beta distribution
+    .coef.sd = purrr::map_dbl(
+      .coef.boot,
+      sd,
+      na.rm = TRUE
+    ),
+    # calculating the confidence interval for beta coef
+    .coef.ll = .coef - qnorm(0.975) * .coef.sd,
+    .coef.ul = .coef + qnorm(0.975) * .coef.sd
+  )
+
+results_ci
+```
+
+## Coverage
+
+```{r remedy004}
+
+results_cov = 
+  results_ci %>%
+  mutate(
+    coverage = .coef.ll < 1 & .coef.ul > 1,
+    cum_mean_cov =  cumsum(coverage) / seq_along(coverage) 
+  ) 
+results_cov
+
+results_cov %>%
+ggplot(aes(x = simid, y = cum_mean_cov)) +
+  geom_line() +
+  geom_hline(aes(yintercept = mean(results_cov$coverage))) +
+  geom_hline(aes(yintercept = 0.95), linetype = "dashed")
+
+mean(results_cov$coverage)
+
+```
