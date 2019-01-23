@@ -185,7 +185,7 @@ will calculate bootstraped model estimates.</p>
   <span class='co'># add models from bootstrap resamples</span>
   <span class='fu'><a href='add_ci.html'>add_ci</a></span>(<span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>23948</span>) <span class='kw'>%&gt;%</span>
   <span class='co'># calculating confidence interval for beta coefficient</span>
-  <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='http://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(
+  <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span>(
     <span class='co'># extracting central estimate of beta</span>
     <span class='kw'>.coef</span> <span class='kw'>=</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span>(
       <span class='no'>.model</span>,
