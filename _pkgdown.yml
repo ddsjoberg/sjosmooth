@@ -30,3 +30,5 @@ reference:
       - sm_regression
       - add_ci
       - add_ci.sm_regression
+      - add_coef
+      - add_coef_sd
