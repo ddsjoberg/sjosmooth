@@ -9,6 +9,16 @@
 #' is `FALSE`
 #' @seealso \code{\link{sm_regression}}
 #' @export
+#' @examples
+#' sm_regression(
+#'   data = mtcars,
+#'   method = "lm",
+#'   formula = mpg ~ am ,
+#'   weighting_var = "hp",
+#'   newdata = data.frame(hp = c(150, 200))
+#' ) %>%
+#' add_ci(n = 10) %>%
+#' add_coef_sd()
 add_coef_sd <- function(x) {
   # checking class of input
   if (!"sm_regression" %in% class(x)) {
