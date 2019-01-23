@@ -80,6 +80,11 @@ add_ci <- function(x, ...) UseMethod("add_ci")
 
 add_ci.sm_regression <- function(x, n = 200, seed = NULL, ...) {
 
+  # will return call, and all object passed to in fmt_table1 call
+  # the object func_inputs is a list of every object passed to the function
+  add_ci_inputs <- as.list(environment())
+  sm_regression_inputs <- attr(x, "sm_regression_inputs")
+
   # setting seed if provided
   if (!is.null(seed)) set.seed(seed)
 
@@ -147,12 +152,16 @@ add_ci.sm_regression <- function(x, n = 200, seed = NULL, ...) {
     dplyr::ungroup()
 
   # merging in bootstapped results with central estimate.
-  x %>%
+  x <- x %>%
     dplyr::left_join(
       result,
       by = names(newdata)
     )
 
+  # adding attributes
+  attr(x, "add_ci_inputs") <- add_ci_inputs
+  attr(x, "sm_regression_inputs") <- sm_regression_inputs
+  return(x)
 }
 
 
