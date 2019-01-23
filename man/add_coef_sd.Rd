@@ -16,6 +16,17 @@ when the regression model is univariate.  From each of the weighted models,
 the coefficient standard deviation will be estimated and
 saved as a column in the output data frame.
 }
+\examples{
+sm_regression(
+  data = mtcars,
+  method = "lm",
+  formula = mpg ~ am ,
+  weighting_var = "hp",
+  newdata = data.frame(hp = c(150, 200))
+) \%>\%
+add_ci(n = 10) \%>\%
+add_coef_sd()
+}
 \seealso{
 \code{\link{sm_regression}}
 }

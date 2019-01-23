@@ -14,6 +14,16 @@ This function is meant to be run after `sm_regression` when the regression model
 is univariate.  From each of the weighted models, the coefficient will be
 saved as a column in the output data frame.
 }
+\examples{
+sm_regression(
+  data = mtcars,
+  method = "lm",
+  formula = mpg ~ am ,
+  weighting_var = "hp",
+  newdata = data.frame(hp = c(150, 200))
+) \%>\%
+add_coef()
+}
 \seealso{
 \code{\link{sm_regression}}
 }
