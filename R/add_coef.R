@@ -21,6 +21,7 @@ add_coef <- function(x) {
   if (!"sm_regression" %in% class(x)) {
     stop("x must be of class sm_regression")
   }
+  attr_sm_regression_inputs <- attr(x, "sm_regression_inputs")
 
   # getting single variable name from RHS of formula
   pred_var <-
@@ -46,6 +47,8 @@ add_coef <- function(x) {
         ))
     )
 
+  attr(x, "sm_regression_inputs") <- attr_sm_regression_inputs
+  class(x) <- c("sm_regression", class(x))
   return(x)
 }
 
