@@ -24,7 +24,10 @@ add_coef_sd <- function(x) {
   if (!"sm_regression" %in% class(x)) {
     stop("x must be of class sm_regression")
   }
-  attr_sm_regression_inputs <- attr(x, "sm_regression_inputs")
+
+  # saving attributes (expect those associated with tibble properties)
+  attr <- attributes(x)
+  attr <- attr[names(attr) %>% setdiff(c("row.names", "class", "names"))]
 
   # checking the bootstrap datasets exist in data frame
   if (!".model.boot" %in% names(x)) {
@@ -64,7 +67,7 @@ add_coef_sd <- function(x) {
 
     )
 
-  attr(x, "sm_regression_inputs") <- attr_sm_regression_inputs
+  attributes(x) <- c(attributes(x), attr)
   class(x) <- c("sm_regression", class(x))
   return(x)
 }
