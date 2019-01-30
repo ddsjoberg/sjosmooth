@@ -56,9 +56,12 @@ add_coef_sd <- function(x) {
           .model.boot,
           ~purrr::map_dbl(
             .x,
-            ~ .x %>%
-            stats::coefficients() %>%
-            purrr::pluck(pred_var) %||% NA_real_
+            purrr::possibly(
+              ~ .x %>%
+                stats::coefficients() %>%
+                purrr::pluck(pred_var) %||% NA_real_,
+              otherwise = NA_real_
+            ) %>% as.numeric()
           )
         ),
       # calculating the SD of the coefs
