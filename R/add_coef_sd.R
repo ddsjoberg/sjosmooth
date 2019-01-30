@@ -9,6 +9,7 @@
 #' is `FALSE`
 #' @seealso \code{\link{sm_regression}}
 #' @export
+#' @importFrom purrr %||%
 #' @examples
 #' sm_regression(
 #'   data = mtcars,
@@ -49,22 +50,24 @@ add_coef_sd <- function(x) {
   x <-
     x %>%
     dplyr::mutate_(
-      .coef.sd =
-        # extracting coefficient from each model, and
+      # extracting coefficient from each model to a list
+      .coef.list =
         ~purrr::map(
           .model.boot,
-          ~purrr::map_dbl(.x,
-                          ~dplyr::case_when(
-                            is.null(.x) ~ NA_real_,
-                            TRUE ~ coef(.x) %>% purrr::pluck(pred_var)
-                          )
+          ~purrr::map_dbl(
+            .x,
+            ~ .x %>%
+            stats::coefficients() %>%
+            purrr::pluck(pred_var) %||% NA_real_
           )
-        ) %>%
-        # calculating SD for each set of bootstrapped results
-        purrr::map_dbl(
-          ~sd(.x, na.rm = TRUE)
+        ),
+      # calculating the SD of the coefs
+      .coef.sd =
+        ~purrr::map_dbl(
+          .coef.list,
+          stats::sd,
+          na.rm =TRUE
         )
-
     )
 
   attributes(x) <- c(attributes(x), attr)
